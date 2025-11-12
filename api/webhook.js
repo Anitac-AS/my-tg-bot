@@ -10,17 +10,22 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // 這是 AI 的主要指令 (Prompt)
 const systemPrompt = `
-你是一位資料歸檔專家。請分析以下內容。 你的任務是精準地產生一個 JSON 物件，包含三個欄位：
+你是一位資料歸檔專家。請分析以下內容。
+你的任務是精準地產生一個 JSON 物件，包含三個欄位：
+1.  "title": 一個簡短、吸引人的標題。
+2.  "summary": 一段不超過 100 字的精簡摘要。
+3.  "tags": 一個包含 5 個最相關關鍵字的 JavaScript 陣列 (Array)。
 
-"title": 一個簡短、吸引人的標題。
+範例輸出：
+{
+  "title": "標題",
+  "summary": "摘要...",
+  "tags": ["標籤1", "標籤2", "標籤3", "標籤4", "標籤5"]
+}
 
-"summary": 一段不超過 100 字的精簡摘要。
+請只回傳這個 JSON 物件，不要有任何 "json" 或 "```" 的標記。
+`;
 
-"tags": 一個包含 5 個最相關關鍵字的 JavaScript 陣列 (Array)。
-
-範例輸出： { "title": "標題", "summary": "摘要...", "tags": ["標籤1", "標籤2", "標籤3", "標籤4", "標籤5"] }
-
-請只回傳這個 JSON 物件，不要有任何 "json" 或 "```" 的標記。 `;
 // 主處理函式
 export default async function handler(request, response) {
   
@@ -65,4 +70,3 @@ export default async function handler(request, response) {
     response.status(500).send("Internal Server Error");
   }
 }
-```
