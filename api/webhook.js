@@ -41,20 +41,31 @@ const systemPrompt = `
 }
 請只輸出純 JSON，勿包含 Markdown 或任何額外文字。`;
 
-// ---- 直打 v1 REST API ----
+// ---- 直打 v1 REST API（修正為 snake_case）----
 async function callGeminiV1(messageText) {
   const key = process.env.GEMINI_API_KEY;
   const url = `https://generativelanguage.googleapis.com/v1/models/${MODEL_NAME}:generateContent?key=${key}`;
+
   const payload = {
     contents: [{ role: "user", parts: [{ text: messageText }] }],
-    systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
-    generationConfig: { responseMimeType: "application/json" },
+
+    // ✅ v1 REST 要用 snake_case
+    system_instruction: {
+      // Content 物件，帶 role 與 parts；不一定要 "system"，用 "user" 也可
+      role: "user",
+      parts: [{ text: systemPrompt }]
+    },
+
+    generation_config: {
+      // ✅ v1 REST 用 response_mime_type
+      response_mime_type: "application/json"
+    }
   };
 
   const r = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(payload)
   });
 
   const text = await r.text();
@@ -63,23 +74,16 @@ async function callGeminiV1(messageText) {
 
   if (!r.ok) {
     let errDetail = text;
-    try {
-      const j = JSON.parse(text);
-      errDetail = JSON.stringify(j);
-    } catch {}
+    try { errDetail = JSON.stringify(JSON.parse(text)); } catch {}
     throw new Error(`Gemini v1 error: ${r.status} ${r.statusText} ${errDetail}`);
   }
 
-  // 正常回應
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    throw new Error("Gemini v1 JSON parse failed");
-  }
+  // 正常回應：把 parts.text 串起來
+  const data = JSON.parse(text);
   const out = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join("") || "";
   return out;
 }
+
 
 // ---- 主處理器 ----
 export default async function handler(req, res) {
@@ -160,3 +164,4 @@ export default async function handler(req, res) {
     return res.status(200).send("OK");
   }
 }
+
