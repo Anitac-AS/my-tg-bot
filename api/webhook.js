@@ -1,20 +1,74 @@
 // 檔案: api/webhook.js
 
-export default function handler(request, response) {
+// 匯入 Google AI SDK
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// 1. 初始化 AI 模型
+// Vercel 會自動從「環境變數」讀取 process.env.GEMINI_API_KEY
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+// 這是 AI 的主要指令 (Prompt)
+const systemPrompt = `
+  你是一位資料歸檔專家。請分析以下內容。
+  你的任務是精準地產生一個 JSON 物件，包含三
+  個欄位：
+  1.  "title": 一個簡短、吸引人的標題。
+  2.  "summary": 一段不超過 100 字的精簡摘要。
+  3.  "tags": 一個包含 5 個最相關關鍵字的
+      JavaScript 陣列 (Array)。
+
+  範例輸出：
+  {
+    "title": "標題",
+    "summary": "摘要...",
+    "tags": ["標籤1", "標籤2", "標籤3", "標籤4", "標籤5"]
+  }
+
+  請只回傳這個 JSON 物件，不要有任何
+  "json" 或 "```" 的標記。
+`;
+
+// 主處理函式
+export default async function handler(request, response) {
+
   try {
-    // 1. 將 Telegram 傳來的整個 request body 印出來
-    // (JSON.stringify(..., null, 2) 是為了讓 log 格式化，更易讀)
+    // --- 1. 從 Telegram 取得訊息 ---
     console.log("TELEGRAM_WEBHOOK_PAYLOAD:", JSON.stringify(request.body, null, 2));
 
-    // 2. 收到訊息後，你可以在這裡觸發「非同步」的 AI 分析
-    // (例如：呼叫 Gemini API、存資料庫等... 這是我們下一步要做的事)
+    // 從複雜的 Telegram JSON 中，只抓出「使用者傳送的文字」
+    // (這會忽略貼圖、編輯訊息、群組訊息等)
+    const messageText = request.body?.message?.text;
 
-    // 3. [重要] 立即回傳 200 OK 給 Telegram
-    // 必須在幾秒內回傳，否則 Telegram 會以為失敗並重試。
-    response.status(200).send("OK. Message received.");
+    // 如果沒有收到文字 (例如傳了貼圖)，就直接回覆 OK
+    if (!messageText) {
+      console.log("No text message found. Skipping AI.");
+      return response.status(200).send("OK. No text.");
+    }
+
+    // --- 2. 呼叫 Gemini AI ---
+    console.log("Sending to Gemini:", messageText);
+
+    const chat = model.startChat({
+      generationConfig: {
+        responseMimeType: "application/json", // [重要] 強迫 AI 回傳 JSON
+      },
+      systemInstruction: systemPrompt,
+    });
+
+    const result = await chat.sendMessage(messageText);
+    const aiResponse = result.response.text();
+
+    // --- 3. 輸出 AI 結果 (目前先印出來) ---
+    console.log("GEMINI_RESPONSE_JSON:", aiResponse);
+
+    // (下一步：我們將在這裡把 aiResponse 存入 Supabase 資料庫)
+
+    // --- 4. 回覆 Telegram ---
+    // 必須立刻回覆 200 OK，讓 Telegram 知道收到了
+    response.status(200).send("OK. AI Processed.");
 
   } catch (error) {
-    // 處理例外錯誤
     console.error("Error processing webhook:", error);
     response.status(500).send("Internal Server Error");
   }
