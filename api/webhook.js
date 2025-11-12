@@ -1,6 +1,5 @@
 // 檔案：api/webhook.js
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import genAIPkg from "@google/generative-ai/package.json" assert { type: "json" };
 
 // ---- 可選：驗證 Telegram Secret Token ----
 function verifyTelegramSecretToken(req) {
@@ -52,8 +51,8 @@ export default async function handler(req, res) {
       return res.status(405).send("Method Not Allowed");
     }
 
-    // 直接印出 SDK 版本與模型名，確認真的切到新版本 + v1 模型
-    console.log("GenAI SDK version:", genAIPkg.version);
+    // 印出 Node 版本與模型名（確認 runtime）
+    console.log("Node version:", process.versions.node);
     console.log("GenAI model name:", MODEL_NAME);
 
     if (!verifyTelegramSecretToken(req)) {
