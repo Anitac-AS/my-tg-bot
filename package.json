@@ -1,6 +1,6 @@
 {
   "name": "my-tg-bot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Telegram AI 知識庫助理 (Gemini)",
   "type": "module",
   "main": "api/webhook.js",
@@ -8,8 +8,7 @@
     "start": "node api/webhook.js"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0",
-    "node-fetch": "^3.3.2"
+    "@google/generative-ai": "0.21.0"
   },
   "engines": {
     "node": ">=18"
