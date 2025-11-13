@@ -14,6 +14,15 @@ const SYSTEM_PROMPT = `
 }
 
 請只輸出「純 JSON」，不要有 Markdown、說明文字或 \`\`\` 區塊。
+重要規則：
+1. 標籤請優先從以下固定列表中選 1~5 個最相關者：
+   ["教育","親子","AI","資訊","健康","旅遊","趣味","購物",興趣]
+
+2. 若內容真的無法匹配上述分類，才允許新增新的標籤，但請控制在 1~2 個。
+
+3. 標籤盡量使用單詞或短片語，避免出現完整句子。
+
+請只輸出純 JSON，不要額外說明、不要 Markdown。
 `;
 
 // 初始化 Gemini SDK
@@ -165,3 +174,4 @@ export default async function handler(req, res) {
     return res.status(200).send("OK");
   }
 }
+
