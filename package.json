@@ -8,8 +8,8 @@
     "start": "node api/webhook.js"
   },
   "dependencies": {
-    "@google/generative-ai": "0.21.0"
-    "@supabase/supabase-js": "^2.48.0"
+    "@google/generative-ai": "0.21.0",
+    "@supabase/supabase-js": "2.48.0"
   },
   "engines": {
     "node": ">=18"
