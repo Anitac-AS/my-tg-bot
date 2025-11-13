@@ -1,8 +1,9 @@
 // 檔案：api/webhook.js
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createClient } from "@supabase/supabase-js";
 
-// ====== 基本設定 ======
-const MODEL_NAME = "gemini-2.0-flash"; // 改用 2.0，避免 1.5 系列的版本混亂
+// ====== Gemini 設定 ======
+const MODEL_NAME = "gemini-2.0-flash";
 
 const SYSTEM_PROMPT = `
 你是一位資料歸檔專家。請分析以下內容，產生一個 JSON 物件，包含：
@@ -12,8 +13,6 @@ const SYSTEM_PROMPT = `
   "summary": "一段不超過 100 字的摘要",
   "tags": ["標籤1","標籤2","標籤3","標籤4","標籤5"]
 }
-
-請只輸出「純 JSON」，不要有 Markdown、說明文字或 \`\`\` 區塊。
 重要規則：
 1. 標籤請優先從以下固定列表中選 1~5 個最相關者：
    ["教育","親子","AI","資訊","健康","旅遊","趣味","購物",興趣]
@@ -21,14 +20,24 @@ const SYSTEM_PROMPT = `
 2. 若內容真的無法匹配上述分類，才允許新增新的標籤，但請控制在 1~2 個。
 
 3. 標籤盡量使用單詞或短片語，避免出現完整句子。
-
-請只輸出純 JSON，不要額外說明、不要 Markdown。
+請只輸出「純 JSON」，不要有 Markdown、說明文字或 \`\`\` 區塊。
 `;
 
-// 初始化 Gemini SDK
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// ---- 驗證 Telegram Secret Token（有設定再驗）----
+// ====== Supabase 設定（Server 端）=====
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+const supabase = supabaseUrl && supabaseKey
+  ? createClient(supabaseUrl, supabaseKey)
+  : null;
+
+if (!supabase) {
+  console.error("Supabase client not initialized. Check SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY.");
+}
+
+// ====== Telegram secret token 驗證（有設才會啟用）======
 function verifyTelegramSecretToken(req) {
   const expected = process.env.TG_SECRET_TOKEN;
   if (!expected) return true;
@@ -36,7 +45,7 @@ function verifyTelegramSecretToken(req) {
   return typeof got === "string" && got === expected;
 }
 
-// ---- 回覆訊息給 Telegram ----
+// ====== 回覆訊息給 Telegram ======
 async function replyToTelegram({ chatId, text }) {
   if (!process.env.BOT_TOKEN) {
     console.error("Missing BOT_TOKEN env var");
@@ -59,15 +68,13 @@ async function replyToTelegram({ chatId, text }) {
 
   if (!r.ok) {
     const t = await r.text().catch(() => "");
-    console.error(
-      `sendMessage failed: ${r.status} ${r.statusText} ${t || "(no body)"}`
-    );
+    console.error(`sendMessage failed: ${r.status} ${r.statusText} ${t || "(no body)"}`);
   }
 }
 
-// ---- Webhook 主處理器 ----
+// ====== Webhook 主處理器 ======
 export default async function handler(req, res) {
-  let chatId; // 給 catch 裡面用
+  let chatId; // 給 catch 用
 
   try {
     console.log("Node version:", process.version);
@@ -85,10 +92,9 @@ export default async function handler(req, res) {
       return res.status(500).send("BOT_TOKEN not configured");
     }
 
-    console.log("GenAI SDK installed version (for reference): 0.21.0");
     console.log("GenAI model name (SDK):", MODEL_NAME);
 
-    // Secret token 驗證（如果有設定）
+    // Secret token 驗證
     if (!verifyTelegramSecretToken(req)) {
       console.warn("Invalid x-telegram-bot-api-secret-token");
       return res.status(401).send("Unauthorized");
@@ -119,7 +125,6 @@ export default async function handler(req, res) {
 
     console.log("Sending to Gemini (SDK):", messageText);
 
-    // 用 SDK 直接呼叫 generateContent（v1beta 預設），交給 SDK 組 JSON
     const model = genAI.getGenerativeModel({
       model: MODEL_NAME,
       systemInstruction: SYSTEM_PROMPT,
@@ -149,6 +154,36 @@ export default async function handler(req, res) {
 
     console.log("GEMINI_RESPONSE_JSON:", parsed);
 
+    // ====== 寫入 Supabase ======
+    if (supabase) {
+      try {
+        const from = msg?.from || {};
+
+        const { error: dbError } = await supabase
+          .from("notes") // 如果你的表名不是 notes，這裡改掉
+          .insert({
+            tg_chat_id: chatId,
+            tg_user_id: from.id ?? null,
+            title: parsed.title ?? null,
+            summary: parsed.summary ?? null,
+            tags: parsed.tags ?? null,   // jsonb 欄位
+            raw_text: messageText,
+            created_at: new Date().toISOString(),
+          });
+
+        if (dbError) {
+          console.error("Supabase insert error:", dbError);
+        } else {
+          console.log("Supabase insert success");
+        }
+      } catch (e) {
+        console.error("Supabase insert exception:", e);
+      }
+    } else {
+      console.warn("Supabase not initialized, skip insert.");
+    }
+
+    // ====== 回覆 Telegram ======
     const pretty = [
       `🧠 <b>AI 摘要完成</b>`,
       `\n<b>標題</b>：${parsed.title ?? ""}`,
@@ -164,14 +199,15 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error("Error processing webhook:", error);
 
-    // 為了避免 Telegram 一直重送，一律回 200
     if (chatId) {
       await replyToTelegram({
         chatId,
         text: "呼叫 AI 服務發生錯誤，已紀錄詳情。",
       });
     }
+    // 為了避免 Telegram 一直重送，這裡還是回 200
     return res.status(200).send("OK");
   }
 }
+
 
