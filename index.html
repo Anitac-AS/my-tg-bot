@@ -60,11 +60,25 @@
     .search-bar {
       display: flex;
       gap: 12px;
+    }
+
+    .search-input-wrapper {
+      flex: 1;
       position: relative;
     }
 
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      pointer-events: none;
+      z-index: 1;
+    }
+
     .search-bar input {
-      flex: 1;
+      width: 100%;
       padding: 14px 20px 14px 48px;
       border-radius: 12px;
       border: 2px solid #e5e7eb;
@@ -79,15 +93,6 @@
       box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
     }
 
-    .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      pointer-events: none;
-    }
-
     .search-bar button {
       padding: 14px 28px;
       border-radius: 12px;
@@ -99,6 +104,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      white-space: nowrap;
     }
 
     .search-bar button:hover:not(:disabled) {
@@ -116,23 +122,28 @@
       transform: none;
     }
 
-    /* Status Bar */
+    /* Status Bar - 移到右下角 */
     .status-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding: 0 4px;
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
     }
 
     #status {
-      font-size: 14px;
+      font-size: 13px;
       color: rgba(255,255,255,0.95);
       font-weight: 500;
-      background: rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.6);
       backdrop-filter: blur(10px);
-      padding: 8px 16px;
+      padding: 10px 16px;
       border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+
+    #status:hover {
+      background: rgba(0,0,0,0.7);
     }
 
     .empty {
@@ -149,6 +160,7 @@
       grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 20px;
       animation: fadeIn 0.8s ease;
+      padding-bottom: 80px; /* 為底部狀態列留空間 */
     }
 
     .card {
@@ -345,16 +357,48 @@
 
       .search-bar button {
         width: 100%;
+        padding: 14px 20px;
+      }
+
+      /* 手機版移除搜尋圖示，避免重疊 */
+      .search-icon {
+        display: none;
+      }
+
+      .search-bar input {
+        padding: 14px 20px;
       }
 
       .cards {
         grid-template-columns: 1fr;
+        padding-bottom: 100px;
       }
 
       .status-bar {
-        flex-direction: column;
-        gap: 12px;
-        align-items: flex-start;
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+      }
+
+      #status {
+        text-align: center;
+        display: block;
+        font-size: 12px;
+        padding: 8px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 24px;
+      }
+
+      .search-wrapper {
+        padding: 16px;
+      }
+
+      .card {
+        padding: 16px;
       }
     }
   </style>
@@ -368,24 +412,27 @@
 
     <div class="search-wrapper">
       <div class="search-bar">
-        <div class="search-icon">
-          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-          </svg>
+        <div class="search-input-wrapper">
+          <div class="search-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <input id="searchInput" type="text" placeholder="搜尋標題、摘要或內容..." />
         </div>
-        <input id="searchInput" type="text" placeholder="搜尋標題、摘要或內容..." />
         <button id="searchBtn">
           <span class="btn-text">搜尋</span>
         </button>
       </div>
     </div>
 
-    <div class="status-bar">
-      <div id="status" class="empty"></div>
-    </div>
-
     <div id="cards" class="cards"></div>
+  </div>
+
+  <!-- 狀態列移到右下角 -->
+  <div class="status-bar">
+    <div id="status"></div>
   </div>
 
   <script>
@@ -398,6 +445,7 @@
       searchBtn.disabled = true;
       searchBtn.innerHTML = '<span class="spinner"></span>';
       statusEl.textContent = q ? `搜尋「${q}」中...` : "載入中...";
+      statusEl.style.display = 'block';
       cardsEl.innerHTML = "";
 
       const params = q ? `?q=${encodeURIComponent(q)}` : "";
@@ -405,7 +453,7 @@
       try {
         const res = await fetch(`/api/notes${params}`);
         if (!res.ok) {
-          statusEl.textContent = "❌ 讀取失敗，請稍後再試";
+          statusEl.textContent = "❌ 讀取失敗";
           searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
           searchBtn.disabled = false;
           return;
@@ -414,14 +462,14 @@
         const data = json.data || [];
 
         if (!data.length) {
-          statusEl.textContent = q ? `🔍 找不到符合「${q}」的資料` : "📭 目前沒有任何記錄";
+          statusEl.textContent = q ? `🔍 無符合結果` : "📭 暫無記錄";
           cardsEl.innerHTML = '<div class="empty">試著新增一些對話記錄吧！</div>';
           searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
           searchBtn.disabled = false;
           return;
         }
 
-        statusEl.textContent = `📊 共找到 ${data.length} 筆記錄`;
+        statusEl.textContent = `共 ${data.length} 筆`;
         cardsEl.innerHTML = "";
 
         data.forEach((row, index) => {
@@ -462,8 +510,8 @@
               })
             : "";
           meta.innerHTML = `
-            <span class="meta-item">💬 Chat: ${row.tg_chat_id ?? 'N/A'}</span>
-            <span class="meta-item">👤 User: ${row.tg_user_id ?? 'N/A'}</span>
+            <span class="meta-item">💬 ${row.tg_chat_id ?? 'N/A'}</span>
+            <span class="meta-item">👤 ${row.tg_user_id ?? 'N/A'}</span>
             <span class="meta-item">🕐 ${created}</span>
           `;
 
