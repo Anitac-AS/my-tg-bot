@@ -605,7 +605,7 @@
     </div>
   </div>
 
- <script>
+<script>
   const searchInput = document.getElementById("searchInput");
   const searchBtn = document.getElementById("searchBtn");
   const cardsEl = document.getElementById("cards");
@@ -618,25 +618,29 @@
   const modalRaw = document.getElementById("modalRaw");
   const modalClose = document.getElementById("modalClose");
 
-  // 固定標籤清單（UI 判斷用）
+  // 固定標籤清單（只用來決定顏色：系統預設用紫色，其他新標籤用灰色）
   const SYSTEM_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
 
-  let activeTag = "";    // 目前用哪個 tag 篩選
-  let currentQuery = ""; // 目前的自由關鍵字（搜尋框內容）
+  let activeTag = "";    // 目前是用哪個 tag 在篩選（側邊 + 卡片標籤）
+  let currentQuery = ""; // 目前搜尋框的關鍵字
+
+  /* ========= Modal：顯示完整 raw_text ========= */
 
   function openRawModal(row) {
     modalTitle.textContent = row.title || "📝 無標題記錄";
     modalRaw.textContent = row.raw_text || "無原始內容";
+
     const created = row.created_at
-      ? new Date(row.created_at).toLocaleString('zh-TW', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
+      ? new Date(row.created_at).toLocaleString("zh-TW", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
         })
       : "";
     modalTime.textContent = created ? `建立時間：${created}` : "";
+
     rawModal.classList.add("open");
   }
 
@@ -651,12 +655,14 @@
     }
   });
 
-  // 建立 sidebar 標籤
+  /* ========= Sidebar 標籤 ========= */
+
   function buildSidebarTags(rows) {
     const tagSet = new Set();
-    rows.forEach(row => {
+
+    rows.forEach((row) => {
       const tags = Array.isArray(row.tags) ? row.tags : [];
-      tags.forEach(t => tagSet.add(t));
+      tags.forEach((t) => tagSet.add(t));
     });
 
     sidebarTagsEl.innerHTML = "";
@@ -665,39 +671,49 @@
     const allBtn = document.createElement("button");
     allBtn.className = "sidebar-tag";
     allBtn.textContent = "全部";
-    if (!activeTag && !currentQuery) allBtn.classList.add("active");
+    if (!activeTag && !currentQuery) {
+      allBtn.classList.add("active");
+    }
     allBtn.addEventListener("click", () => {
       activeTag = "";
       currentQuery = "";
       searchInput.value = "";
-      loadNotes("", "");
+      loadNotes("", ""); // 不帶 q、不帶 tag => 全部
     });
     sidebarTagsEl.appendChild(allBtn);
 
-    // 其他 tag
-    Array.from(tagSet).sort().forEach(tag => {
-      const btn = document.createElement("button");
-      btn.className = "sidebar-tag";
-      btn.textContent = tag;
-      if (activeTag === tag) btn.classList.add("active");
+    // 其他標籤（依字母排序，視覺上穩定一點）
+    Array.from(tagSet)
+      .sort((a, b) => a.localeCompare(b, "zh-Hant"))
+      .forEach((tag) => {
+        const btn = document.createElement("button");
+        btn.className = "sidebar-tag";
+        btn.textContent = tag;
 
-      btn.addEventListener("click", () => {
         if (activeTag === tag) {
-          // 再點一次同一個 tag = 取消篩選
-          activeTag = "";
-          searchInput.value = "";
-          loadNotes("", "");
-        } else {
-          activeTag = tag;
-          currentQuery = "";      // 用標籤篩選時，清掉自由關鍵字
-          searchInput.value = tag; // 只是顯示在輸入框
-          loadNotes("", tag);
+          btn.classList.add("active");
         }
-      });
 
-      sidebarTagsEl.appendChild(btn);
-    });
+        btn.addEventListener("click", () => {
+          if (activeTag === tag) {
+            // 再點一次同一個標籤 = 取消篩選
+            activeTag = "";
+            currentQuery = "";
+            searchInput.value = "";
+            loadNotes("", "");
+          } else {
+            activeTag = tag;
+            currentQuery = "";       // 用標籤篩選時，不用 q
+            searchInput.value = tag; // 只是顯示在搜尋框
+            loadNotes("", tag);      // 只帶 tag
+          }
+        });
+
+        sidebarTagsEl.appendChild(btn);
+      });
   }
+
+  /* ========= 主資料載入：支援 q + tag ========= */
 
   async function loadNotes(q = "", tag = "") {
     currentQuery = q;
@@ -708,12 +724,14 @@
     statusEl.style.display = "block";
     cardsEl.innerHTML = "";
 
-    // 組 query string
+    // 組 URL：q（自由關鍵字），tag（標籤）
     const params = new URLSearchParams();
     if (q)   params.set("q", q);
     if (tag) params.set("tag", tag);
 
-    const url = params.toString() ? `/api/notes?${params.toString()}` : "/api/notes";
+    const url = params.toString()
+      ? `/api/notes?${params.toString()}`
+      : "/api/notes";
 
     try {
       const res = await fetch(url);
@@ -723,6 +741,7 @@
         searchBtn.disabled = false;
         return;
       }
+
       const json = await res.json();
       const data = json.data || [];
 
@@ -730,8 +749,9 @@
       buildSidebarTags(data);
 
       if (!data.length) {
-        statusEl.textContent = (q || tag) ? `🔍 無符合結果` : "📭 暫無記錄";
-        cardsEl.innerHTML = '<div class="empty">試著新增一些對話記錄吧！</div>';
+        statusEl.textContent = (q || tag) ? "🔍 無符合結果" : "📭 暫無記錄";
+        cardsEl.innerHTML =
+          '<div class="empty">試著新增一些對話記錄吧！</div>';
         searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
         searchBtn.disabled = false;
         return;
@@ -745,16 +765,18 @@
         card.className = "card";
         card.style.animationDelay = `${index * 0.05}s`;
 
-        // 點整張卡片 = 看原文 Modal（點標籤時不觸發）
+        // 點整張卡片 = 打開原文 modal（點到標籤則由標籤自己的事件處理）
         card.addEventListener("click", (e) => {
           if (e.target.closest(".card-tags span")) return;
           openRawModal(row);
         });
 
+        // 標題
         const title = document.createElement("div");
         title.className = "card-title";
         title.textContent = row.title || "📝 無標題記錄";
 
+        // 摘要
         const summary = document.createElement("div");
         summary.className = "card-summary";
         summary.textContent = row.summary || "暫無摘要內容";
@@ -764,50 +786,51 @@
         tagsDiv.className = "card-tags";
         const tags = Array.isArray(row.tags) ? row.tags : [];
 
-        tags.forEach(t => {
+        tags.forEach((t) => {
           const span = document.createElement("span");
           const isSystem = SYSTEM_TAGS.includes(t);
 
-          // 固定標籤 = 藍紫 / 新增標籤 = 灰
+          // 系統預設標籤用藍紫色，其它新標籤用灰色
           span.style.background = isSystem
             ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)"
             : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
-
           span.style.color = isSystem ? "#5b21b6" : "#374151";
           span.textContent = `#${t}`;
 
+          // 點卡片上的標籤 = 用 tag 搜尋
           span.addEventListener("click", (e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // 不要觸發卡片的 click（開 modal）
             if (activeTag === t) {
               activeTag = "";
+              currentQuery = "";
               searchInput.value = "";
               loadNotes("", "");
             } else {
               activeTag = t;
               currentQuery = "";
               searchInput.value = t;
-              loadNotes("", t); // 用 tag 過濾
+              loadNotes("", t);
             }
           });
 
           tagsDiv.appendChild(span);
         });
 
-        // meta — 只留時間
+        // meta（只顯示時間）
         const meta = document.createElement("div");
         meta.className = "card-meta";
         const created = row.created_at
-          ? new Date(row.created_at).toLocaleString('zh-TW', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
+          ? new Date(row.created_at).toLocaleString("zh-TW", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
             })
           : "";
         meta.innerHTML = `<span class="meta-item">🕐 ${created}</span>`;
 
-        // Raw text 縮短預覽
+        // 原文預覽（縮短）
         const raw = document.createElement("div");
         raw.className = "card-raw";
         raw.textContent = row.raw_text || "無原始內容";
@@ -823,17 +846,20 @@
     } catch (error) {
       console.error(error);
       statusEl.textContent = "❌ 載入錯誤";
-      cardsEl.innerHTML = '<div class="empty">發生錯誤，請檢查網路連線</div>';
+      cardsEl.innerHTML =
+        '<div class="empty">發生錯誤，請檢查網路連線</div>';
     }
 
     searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
     searchBtn.disabled = false;
   }
 
-  // 初次載入（總覽）
+  /* ========= 事件綁定 ========= */
+
+  // 初次載入：全部
   loadNotes("", "");
 
-  // 按「搜尋」＝自由關鍵字搜尋（不綁 tag）
+  // 按「搜尋」＝ 只用自由關鍵字，不綁定特定 tag
   searchBtn.addEventListener("click", () => {
     activeTag = "";
     const q = searchInput.value.trim();
@@ -849,6 +875,7 @@
     }
   });
 </script>
+
 
 </body>
 </html>
