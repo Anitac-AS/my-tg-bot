@@ -27,7 +27,7 @@
     /* Header */
     .header {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 24px;
       animation: fadeInDown 0.6s ease;
     }
 
@@ -52,7 +52,7 @@
       backdrop-filter: blur(10px);
       border-radius: 16px;
       padding: 24px;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.1);
       animation: fadeInUp 0.6s ease;
     }
@@ -122,28 +122,63 @@
       transform: none;
     }
 
-    /* Status Bar - 移到右下角 */
-    .status-bar {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 1000;
+    /* Layout with sidebar */
+    .layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 20px;
+      align-items: flex-start;
     }
 
-    #status {
-      font-size: 13px;
-      color: rgba(255,255,255,0.95);
-      font-weight: 500;
-      background: rgba(0,0,0,0.6);
+    .sidebar {
+      background: rgba(255,255,255,0.95);
       backdrop-filter: blur(10px);
-      padding: 10px 16px;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+      animation: fadeIn 0.6s ease;
     }
 
-    #status:hover {
-      background: rgba(0,0,0,0.7);
+    .sidebar-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #4b5563;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sidebar-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .sidebar-tag {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #f3f4f6;
+      color: #374151;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .sidebar-tag:hover {
+      background: #e5e7eb;
+    }
+
+    .sidebar-tag.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(79,70,229,0.4);
+    }
+
+    .main {
+      min-width: 0;
     }
 
     .empty {
@@ -175,11 +210,19 @@
       transition: all 0.3s ease;
       border: 1px solid rgba(255,255,255,0.3);
       animation: cardFadeIn 0.5s ease backwards;
+      cursor: pointer;
     }
 
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
     }
 
     .card-title {
@@ -191,6 +234,31 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .card-action-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      background: #f3f4f6;
+      color: #4b5563;
+      transition: all 0.2s ease;
+    }
+
+    .card-action-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .card-action-btn.delete {
+      color: #b91c1c;
     }
 
     .card-summary {
@@ -220,6 +288,7 @@
       font-size: 12px;
       font-weight: 600;
       transition: all 0.2s ease;
+      cursor: pointer;
     }
 
     .card-tags span:hover {
@@ -275,6 +344,119 @@
       background: #94a3b8;
     }
 
+    /* Status Bar (右下角) */
+    .status-bar {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+    }
+
+    #status {
+      font-size: 13px;
+      color: rgba(255,255,255,0.95);
+      font-weight: 500;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(10px);
+      padding: 10px 16px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+
+    #status:hover {
+      background: rgba(0,0,0,0.7);
+    }
+
+    /* Modal for raw_text */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15,23,42,0.55);
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-content {
+      position: relative;
+      background: #f9fafb;
+      border-radius: 16px;
+      padding: 20px 24px;
+      max-width: 720px;
+      width: calc(100% - 40px);
+      max-height: 80vh;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+      margin-right: 32px;
+    }
+
+    .modal-time {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .modal-raw {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #111827;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      padding: 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-raw::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .modal-raw::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      border: none;
+      background: transparent;
+      font-size: 20px;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .modal-close:hover {
+      color: #111827;
+    }
+
     /* Animations */
     @keyframes fadeInDown {
       from {
@@ -299,12 +481,8 @@
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     @keyframes cardFadeIn {
@@ -360,7 +538,22 @@
         padding: 14px 20px;
       }
 
-      /* 手機版移除搜尋圖示，避免重疊 */
+      .layout {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .sidebar {
+        padding: 14px 12px;
+        overflow-x: auto;
+      }
+
+      .sidebar-tags {
+        flex-wrap: nowrap;
+      }
+
+      /* 手機版移除搜尋圖示 */
       .search-icon {
         display: none;
       }
@@ -385,6 +578,11 @@
         display: block;
         font-size: 12px;
         padding: 8px 12px;
+      }
+
+      .modal-content {
+        max-width: 100%;
+        width: calc(100% - 24px);
       }
     }
 
@@ -427,146 +625,367 @@
       </div>
     </div>
 
-    <div id="cards" class="cards"></div>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-title">📂 標籤分類</div>
+        <div id="sidebarTags" class="sidebar-tags"></div>
+      </aside>
+
+      <main class="main">
+        <div id="cards" class="cards"></div>
+      </main>
+    </div>
   </div>
 
-  <!-- 狀態列移到右下角 -->
+  <!-- 狀態列 -->
   <div class="status-bar">
     <div id="status"></div>
   </div>
 
-<script>
-  const searchInput = document.getElementById("searchInput");
-  const searchBtn = document.getElementById("searchBtn");
-  const cardsEl = document.getElementById("cards");
-  const statusEl = document.getElementById("status");
+  <!-- Raw Text Modal -->
+  <div id="rawModal" class="modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button id="modalClose" class="modal-close">&times;</button>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-time" id="modalTime"></div>
+      <div class="modal-raw" id="modalRaw"></div>
+    </div>
+  </div>
 
-  // 固定標籤清單（給 UI 判斷用）
-  const SYSTEM_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
+  <script>
+    const searchInput = document.getElementById("searchInput");
+    const searchBtn = document.getElementById("searchBtn");
+    const cardsEl = document.getElementById("cards");
+    const statusEl = document.getElementById("status");
+    const sidebarTagsEl = document.getElementById("sidebarTags");
 
-  async function loadNotes(q = "") {
-    searchBtn.disabled = true;
-    searchBtn.innerHTML = '<span class="spinner"></span>';
-    statusEl.textContent = q ? `搜尋「${q}」中...` : "載入中...";
-    statusEl.style.display = 'block';
-    cardsEl.innerHTML = "";
+    const rawModal = document.getElementById("rawModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalTime = document.getElementById("modalTime");
+    const modalRaw = document.getElementById("modalRaw");
+    const modalClose = document.getElementById("modalClose");
 
-    const params = q ? `?q=${encodeURIComponent(q)}` : "";
-    
-    try {
-      const res = await fetch(`/api/notes${params}`);
-      if (!res.ok) {
-        statusEl.textContent = "❌ 讀取失敗";
-        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
-        searchBtn.disabled = false;
-        return;
+    // 固定標籤清單（UI 判斷用）
+    const SYSTEM_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
+
+    let activeTag = "";    // 目前用哪個 tag 篩選
+    let lastQuery = "";    // 目前的搜尋字串（含 tag 或自由關鍵字）
+
+    function openRawModal(row) {
+      modalTitle.textContent = row.title || "📝 無標題記錄";
+      modalRaw.textContent = row.raw_text || "無原始內容";
+      const created = row.created_at
+        ? new Date(row.created_at).toLocaleString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : "";
+      modalTime.textContent = created ? `建立時間：${created}` : "";
+      rawModal.classList.add("open");
+    }
+
+    function closeRawModal() {
+      rawModal.classList.remove("open");
+    }
+
+    modalClose.addEventListener("click", closeRawModal);
+    rawModal.addEventListener("click", (e) => {
+      if (e.target === rawModal || e.target.classList.contains("modal-backdrop")) {
+        closeRawModal();
       }
-      const json = await res.json();
-      const data = json.data || [];
+    });
 
-      if (!data.length) {
-        statusEl.textContent = q ? `🔍 無符合結果` : "📭 暫無記錄";
-        cardsEl.innerHTML = '<div class="empty">試著新增一些對話記錄吧！</div>';
-        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
-        searchBtn.disabled = false;
-        return;
-      }
+    // 建立 sidebar 標籤
+    function buildSidebarTags(rows) {
+      const tagSet = new Set();
 
-      statusEl.textContent = `共 ${data.length} 筆`;
-      cardsEl.innerHTML = "";
-
-      data.forEach((row, index) => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.style.animationDelay = `${index * 0.05}s`;
-
-        // Title
-        const title = document.createElement("div");
-        title.className = "card-title";
-        title.textContent = row.title || "📝 無標題記錄";
-
-        // Summary
-        const summary = document.createElement("div");
-        summary.className = "card-summary";
-        summary.textContent = row.summary || "暫無摘要內容";
-
-        // Tags
-        const tagsDiv = document.createElement("div");
-        tagsDiv.className = "card-tags";
+      rows.forEach(row => {
         const tags = Array.isArray(row.tags) ? row.tags : [];
+        tags.forEach(t => tagSet.add(t));
+      });
 
-        tags.forEach(t => {
-          const span = document.createElement("span");
-          const isSystem = SYSTEM_TAGS.includes(t);
+      sidebarTagsEl.innerHTML = "";
 
-          // 固定標籤 = 藍紫色 / 新增標籤 = 灰色
-          span.style.background = isSystem
-            ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)"
-            : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
+      // 「全部」按鈕
+      const allBtn = document.createElement("button");
+      allBtn.className = "sidebar-tag";
+      allBtn.textContent = "全部";
+      if (!activeTag && !lastQuery) allBtn.classList.add("active");
+      allBtn.addEventListener("click", () => {
+        activeTag = "";
+        lastQuery = "";
+        searchInput.value = "";
+        loadNotes("");
+      });
+      sidebarTagsEl.appendChild(allBtn);
 
-          span.style.color = isSystem ? "#5b21b6" : "#374151";
-          span.textContent = `#${t}`;
+      // 其他 tag
+      Array.from(tagSet).sort().forEach(tag => {
+        const btn = document.createElement("button");
+        btn.className = "sidebar-tag";
+        btn.textContent = tag;
+        if (activeTag === tag) btn.classList.add("active");
 
-          // 點擊標籤就搜尋該標籤
-          span.addEventListener("click", () => {
-            searchInput.value = t;
-            loadNotes(t);
-          });
-
-          tagsDiv.appendChild(span);
+        btn.addEventListener("click", () => {
+          // 再點一次同一個 tag = 取消篩選
+          if (activeTag === tag) {
+            activeTag = "";
+            lastQuery = "";
+            searchInput.value = "";
+            loadNotes("");
+          } else {
+            activeTag = tag;
+            lastQuery = tag;
+            searchInput.value = tag;
+            loadNotes(tag);
+          }
         });
 
-        // meta — 只留時間
-        const meta = document.createElement("div");
-        meta.className = "card-meta";
-        const created = row.created_at
-          ? new Date(row.created_at).toLocaleString('zh-TW', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            })
-          : "";
-        meta.innerHTML = `<span class="meta-item">🕐 ${created}</span>`;
-
-        // Raw text
-        const raw = document.createElement("div");
-        raw.className = "card-raw";
-        raw.textContent = row.raw_text || "無原始內容";
-
-        // 組卡片
-        card.appendChild(title);
-        card.appendChild(summary);
-        if (tagsDiv.childNodes.length) card.appendChild(tagsDiv);
-        card.appendChild(meta);
-        card.appendChild(raw);
-
-        cardsEl.appendChild(card);
+        sidebarTagsEl.appendChild(btn);
       });
-    } catch (error) {
-      statusEl.textContent = "❌ 載入錯誤";
-      cardsEl.innerHTML = '<div class="empty">發生錯誤，請檢查網路連線</div>';
     }
 
-    searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
-    searchBtn.disabled = false;
-  }
+    async function handleDelete(row) {
+      const ok = window.confirm("確定要刪除這張卡片嗎？\n刪除後無法復原。");
+      if (!ok) return;
 
-  // 初次載入
-  loadNotes();
+      try {
+        const res = await fetch(`/api/notes?id=${encodeURIComponent(row.id)}`, {
+          method: "DELETE"
+        });
+        if (!res.ok) {
+          alert("刪除失敗，請稍後再試");
+          return;
+        }
+        // 刷新當前列表（維持搜尋／標籤狀態）
+        loadNotes(lastQuery);
+      } catch (e) {
+        console.error("Delete error:", e);
+        alert("刪除時發生錯誤");
+      }
+    }
 
-  searchBtn.addEventListener("click", () => {
-    loadNotes(searchInput.value.trim());
-  });
+    async function handleEdit(row) {
+      const newTitle = window.prompt("編輯標題", row.title || "");
+      if (newTitle === null) return;
 
-  // Enter 搜尋
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
+      const newSummary = window.prompt("編輯摘要", row.summary || "");
+      if (newSummary === null) return;
+
+      const tagsStr = window.prompt(
+        "編輯標籤（以逗號分隔）",
+        Array.isArray(row.tags) ? row.tags.join(",") : ""
+      );
+      if (tagsStr === null) return;
+
+      const newTags = tagsStr
+        .split(",")
+        .map(t => t.trim())
+        .filter(Boolean);
+
+      try {
+        const res = await fetch("/api/notes", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: row.id,
+            title: newTitle,
+            summary: newSummary,
+            tags: newTags
+          })
+        });
+
+        if (!res.ok) {
+          alert("更新失敗，請稍後再試");
+          return;
+        }
+
+        loadNotes(lastQuery);
+      } catch (e) {
+        console.error("Edit error:", e);
+        alert("更新時發生錯誤");
+      }
+    }
+
+    async function loadNotes(q = "") {
+      lastQuery = q;
+
+      searchBtn.disabled = true;
+      searchBtn.innerHTML = '<span class="spinner"></span>';
+      statusEl.textContent = q ? `搜尋「${q}」中...` : "載入中...";
+      statusEl.style.display = 'block';
+      cardsEl.innerHTML = "";
+
+      const params = q ? `?q=${encodeURIComponent(q)}` : "";
+      
+      try {
+        const res = await fetch(`/api/notes${params}`);
+        if (!res.ok) {
+          statusEl.textContent = "❌ 讀取失敗";
+          searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+          searchBtn.disabled = false;
+          return;
+        }
+        const json = await res.json();
+        const data = json.data || [];
+
+        // 建 sidebar（依目前資料集）
+        buildSidebarTags(data);
+
+        if (!data.length) {
+          statusEl.textContent = q ? `🔍 無符合結果` : "📭 暫無記錄";
+          cardsEl.innerHTML = '<div class="empty">試著新增一些對話記錄吧！</div>';
+          searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+          searchBtn.disabled = false;
+          return;
+        }
+
+        statusEl.textContent = `共 ${data.length} 筆`;
+        cardsEl.innerHTML = "";
+
+        data.forEach((row, index) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.style.animationDelay = `${index * 0.05}s`;
+
+          // 點整張卡片 = 看原文 Modal
+          card.addEventListener("click", (e) => {
+            // 如果點到的是按鈕或標籤，就不要觸發
+            if (e.target.closest(".card-action-btn") || e.target.closest(".card-tags span")) {
+              return;
+            }
+            openRawModal(row);
+          });
+
+          // Header: 標題 + 編輯 / 刪除
+          const header = document.createElement("div");
+          header.className = "card-header";
+
+          const title = document.createElement("div");
+          title.className = "card-title";
+          title.textContent = row.title || "📝 無標題記錄";
+
+          const actions = document.createElement("div");
+          actions.className = "card-actions";
+
+          const editBtn = document.createElement("button");
+          editBtn.className = "card-action-btn";
+          editBtn.textContent = "編輯";
+          editBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            handleEdit(row);
+          });
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "card-action-btn delete";
+          deleteBtn.textContent = "刪除";
+          deleteBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            handleDelete(row);
+          });
+
+          actions.appendChild(editBtn);
+          actions.appendChild(deleteBtn);
+
+          header.appendChild(title);
+          header.appendChild(actions);
+
+          // Summary
+          const summary = document.createElement("div");
+          summary.className = "card-summary";
+          summary.textContent = row.summary || "暫無摘要內容";
+
+          // Tags
+          const tagsDiv = document.createElement("div");
+          tagsDiv.className = "card-tags";
+          const tags = Array.isArray(row.tags) ? row.tags : [];
+
+          tags.forEach(t => {
+            const span = document.createElement("span");
+            const isSystem = SYSTEM_TAGS.includes(t);
+
+            // 固定標籤 = 藍紫 / 新增標籤 = 灰
+            span.style.background = isSystem
+              ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)"
+              : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
+
+            span.style.color = isSystem ? "#5b21b6" : "#374151";
+            span.textContent = `#${t}`;
+
+            span.addEventListener("click", (e) => {
+              e.stopPropagation();
+              if (activeTag === t) {
+                activeTag = "";
+                lastQuery = "";
+                searchInput.value = "";
+                loadNotes("");
+              } else {
+                activeTag = t;
+                lastQuery = t;
+                searchInput.value = t;
+                loadNotes(t);
+              }
+            });
+
+            tagsDiv.appendChild(span);
+          });
+
+          // meta — 只留時間
+          const meta = document.createElement("div");
+          meta.className = "card-meta";
+          const created = row.created_at
+            ? new Date(row.created_at).toLocaleString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            : "";
+          meta.innerHTML = `<span class="meta-item">🕐 ${created}</span>`;
+
+          // Raw text 縮短預覽
+          const raw = document.createElement("div");
+          raw.className = "card-raw";
+          raw.textContent = row.raw_text || "無原始內容";
+
+          card.appendChild(header);
+          card.appendChild(summary);
+          if (tagsDiv.childNodes.length) card.appendChild(tagsDiv);
+          card.appendChild(meta);
+          card.appendChild(raw);
+
+          cardsEl.appendChild(card);
+        });
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = "❌ 載入錯誤";
+        cardsEl.innerHTML = '<div class="empty">發生錯誤，請檢查網路連線</div>';
+      }
+
+      searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+      searchBtn.disabled = false;
+    }
+
+    // 初次載入（總覽）
+    loadNotes("");
+
+    searchBtn.addEventListener("click", () => {
+      activeTag = ""; // 按搜尋視為自由關鍵字，不鎖特定 tag
       loadNotes(searchInput.value.trim());
-    }
-  });
-</script>
+    });
 
+    // Enter 直接搜尋
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        activeTag = "";
+        loadNotes(searchInput.value.trim());
+      }
+    });
+  </script>
 </body>
 </html>
