@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 解析 ?q= 關鍵字 以及 ?tag= 標籤  👇👇 這裡多抓一個 tag
+    // 解析 ?q= 關鍵字 & ?tag= 標籤
     const url = new URL(req.url, `https://${req.headers.host}`);
     const q   = url.searchParams.get("q")?.trim()   || "";
     const tag = url.searchParams.get("tag")?.trim() || "";
@@ -31,19 +31,12 @@ export default async function handler(req, res) {
       .order("created_at", { ascending: false })
       .limit(50);
 
-    // 自由關鍵字搜尋：title / summary / raw_text
+    // 用 ilike 搜尋 title / summary / raw_text
     if (q) {
       const pattern = `%${q}%`;
       query = query.or(
         `title.ilike.${pattern},summary.ilike.${pattern},raw_text.ilike.${pattern}`
       );
-    }
-
-    // 標籤過濾：tags 為 jsonb 陣列，使用 contains
-    // 例如 tags 欄位內容為 ["美食","購物","地方特產"]
-    // ?tag=美食 會找到這一筆
-    if (tag) {
-      query = query.contains("tags", [tag]);
     }
 
     const { data, error } = await query;
@@ -53,7 +46,15 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Supabase query error" });
     }
 
-    return res.status(200).json({ data });
+    // 👉 在程式裡用 tags 做第二層過濾（真正的「標籤搜尋」）
+    let result = data || [];
+    if (tag) {
+      result = result.filter(row =>
+        Array.isArray(row.tags) && row.tags.includes(tag)
+      );
+    }
+
+    return res.status(200).json({ data: result });
   } catch (err) {
     console.error("Notes API error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
