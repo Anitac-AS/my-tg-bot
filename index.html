@@ -667,61 +667,68 @@
 
   /* ========= Sidebar 標籤 ========= */
 
-  function buildSidebarTags(rows) {
-    const tagSet = new Set();
+function buildSidebarTags(rows) {
+  const tagCounts = new Map();
 
-    rows.forEach((row) => {
-      const tags = Array.isArray(row.tags) ? row.tags : [];
-      tags.forEach((t) => tagSet.add(t));
+  // 統計每個 tag 出現次數
+  rows.forEach((row) => {
+    const tags = Array.isArray(row.tags) ? row.tags : [];
+    tags.forEach((t) => {
+      tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
     });
+  });
 
-    sidebarTagsEl.innerHTML = "";
+  sidebarTagsEl.innerHTML = "";
 
-    // 「全部」按鈕
-    const allBtn = document.createElement("button");
-    allBtn.className = "sidebar-tag";
-    allBtn.textContent = "全部";
-    if (!activeTag && !currentQuery) {
-      allBtn.classList.add("active");
-    }
-    allBtn.addEventListener("click", () => {
-      activeTag = "";
-      currentQuery = "";
-      searchInput.value = "";
-      loadNotes("", ""); // 不帶 q、不帶 tag => 全部
-    });
-    sidebarTagsEl.appendChild(allBtn);
-
-    // 其他標籤（依字母排序，視覺上穩定一點）
-    Array.from(tagSet)
-      .sort((a, b) => a.localeCompare(b, "zh-Hant"))
-      .forEach((tag) => {
-        const btn = document.createElement("button");
-        btn.className = "sidebar-tag";
-        btn.textContent = tag;
-
-        if (activeTag === tag) {
-          btn.classList.add("active");
-        }
-
-        btn.addEventListener("click", () => {
-          if (activeTag === tag) {
-            // 再點一次同一個標籤 = 取消篩選
-            activeTag = "";
-            currentQuery = "";
-            searchInput.value = "";
-            loadNotes("", "");
-          } else {
-            activeTag = tag;
-            currentQuery = "";       // 用標籤篩選時，不用 q
-            searchInput.value = tag; // 只是顯示在搜尋框
-            loadNotes("", tag);      // 只帶 tag
-          }
-        });
-
-        sidebarTagsEl.appendChild(btn);
-      });
+  // 「全部」按鈕
+  const allBtn = document.createElement("button");
+  allBtn.className = "sidebar-tag";
+  allBtn.textContent = "全部";
+  if (!activeTag && !currentQuery) {
+    allBtn.classList.add("active");
   }
+  allBtn.addEventListener("click", () => {
+    activeTag = "";
+    currentQuery = "";
+    searchInput.value = "";
+    loadNotes("", "");
+  });
+  sidebarTagsEl.appendChild(allBtn);
+
+  // 依「出現次數多 ➜ 少」，次要條件再用字母排序
+  const sortedTags = Array.from(tagCounts.entries()).sort(
+    ([tagA, countA], [tagB, countB]) => {
+      if (countA !== countB) return countB - countA; // 次數多的在前面
+      return tagA.localeCompare(tagB, "zh-Hant");    // 次數一樣再比字
+    }
+  );
+
+  sortedTags.forEach(([tag]) => {
+    const btn = document.createElement("button");
+    btn.className = "sidebar-tag";
+    btn.textContent = tag;
+    if (activeTag === tag) {
+      btn.classList.add("active");
+    }
+
+    btn.addEventListener("click", () => {
+      if (activeTag === tag) {
+        activeTag = "";
+        currentQuery = "";
+        searchInput.value = "";
+        loadNotes("", "");
+      } else {
+        activeTag = tag;
+        currentQuery = "";
+        searchInput.value = tag;
+        loadNotes("", tag);
+      }
+    });
+
+    sidebarTagsEl.appendChild(btn);
+  });
+}
+
 
   /* ========= 主資料載入：支援 q + tag ========= */
 
