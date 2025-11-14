@@ -129,6 +129,9 @@
       grid-template-columns: 240px minmax(0, 1fr);
       gap: 20px;
       align-items: flex-start;
+      width: 100%;           /* 新增 */
+      max-width: 100%;       /* 新增 */
+      overflow: hidden;      /* 新增 */
     }
 
     .sidebar {
@@ -180,6 +183,8 @@
 
     .main {
       min-width: 0;
+      width: 100%;           /* 新增 */
+      overflow: hidden;      /* 新增 */
     }
 
     .empty {
@@ -197,6 +202,7 @@
       gap: 20px;
       animation: fadeIn 0.8s ease;
       padding-bottom: 80px; /* 為底部狀態列留空間 */
+      width: 100%; 
     }
 
     .card {
@@ -212,6 +218,8 @@
       border: 1px solid rgba(255,255,255,0.3);
       animation: cardFadeIn 0.5s ease backwards;
       cursor: pointer;
+      max-width: 100%;       /* 新增：防止卡片超出 */
+      overflow: hidden;      /* 新增：內容超出時隱藏 */
     }
 
     .card:hover {
@@ -463,105 +471,147 @@
     }
 
     /* Responsive：手機優化 sidebar & modal */
-    @media (max-width: 768px) {
-      .container {
-        padding: 20px 16px;
-      }
+/* Responsive：手機優化 sidebar & modal */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 16px;
+  }
 
-      h1 {
-        font-size: 28px;
-      }
-    .layout {
-      width: 100%;
-    }
+  h1 {
+    font-size: 28px;
+  }
 
-    .search-wrapper,
-    .sidebar,
-    .card {
-      width: 100%;
-      max-width: 100%;
-      }
+  .subtitle {
+    font-size: 14px;
+  }
 
-      .subtitle {
-        font-size: 14px;
-      }
+  .search-wrapper {
+    padding: 20px;
+  }
 
-      .search-wrapper {
-        padding: 20px;
-      }
+  .search-bar {
+    flex-direction: column;
+  }
 
-      .search-bar {
-        flex-direction: column;
-      }
+  .search-bar button {
+    width: 100%;
+    padding: 14px 20px;
+  }
 
-      .search-bar button {
-        width: 100%;
-        padding: 14px 20px;
-      }
+  /* 重點修正：layout 改為單欄，不使用 grid */
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
-      .layout {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
+  /* 側邊欄寬度 100% */
+  .sidebar {
+    width: 100%;
+    padding: 14px 16px;
+  }
 
-      .sidebar {
-        padding: 14px 12px;
-        overflow-x: visible;        /* 不再橫向捲動 */
-      }
+  .sidebar-tags {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 
-      .sidebar-tags {
-        flex-wrap: wrap;            /* 手機版自動換行 */
-        gap: 8px;
-      }
+  /* 主內容區域寬度 100% */
+  .main {
+    width: 100%;
+  }
 
-      /* 手機版移除搜尋圖示 */
-      .search-icon {
-        display: none;
-      }
+  /* 手機版移除搜尋圖示 */
+  .search-icon {
+    display: none;
+  }
 
-      .search-bar input {
-        padding: 14px 20px;
-      }
+  .search-bar input {
+    padding: 14px 20px;
+  }
 
-      .cards {
-        grid-template-columns: 1fr;
-        padding-bottom: 100px;
-      }
+  /* Cards 強制單欄 */
+  .cards {
+    grid-template-columns: 1fr;
+    padding-bottom: 100px;
+    width: 100%;
+  }
 
-      .status-bar {
-        bottom: 16px;
-        right: 16px;
-        left: 16px;
-      }
+  /* Card 強制不超出 */
+  .card {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px;
+  }
 
-      #status {
-        text-align: center;
-        display: block;
-        font-size: 12px;
-        padding: 8px 12px;
-      }
+  .status-bar {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+  }
 
-      .modal-content {
-        max-width: 100%;
-        width: calc(100% - 24px);  /* 兩側各留一點空間 */
-        max-height: 90vh;          /* 高度控制在視窗內 */
-      }
-    }
+  #status {
+    text-align: center;
+    display: block;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
 
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 24px;
-      }
+  /* Modal 修正：確保不溢出 */
+  .modal-content {
+    width: calc(100vw - 32px);  /* 使用 vw 確保不超出視窗 */
+    max-width: calc(100vw - 32px);
+    max-height: 85vh;
+    margin: 0 16px;
+  }
 
-      .search-wrapper {
-        padding: 16px;
-      }
+  .modal-title {
+    font-size: 16px;
+    padding-right: 32px;
+    word-wrap: break-word;
+  }
 
-      .card {
-        padding: 16px;
-      }
-    }
+  .modal-raw {
+    font-size: 13px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 16px 12px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .search-wrapper {
+    padding: 16px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .sidebar {
+    padding: 12px;
+  }
+
+  .sidebar-tag {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+
+  /* 更小螢幕的 Modal */
+  .modal-content {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    margin: 0 12px;
+    padding: 16px;
+  }
+}    
   </style>
 </head>
 <body>
