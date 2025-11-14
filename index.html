@@ -435,120 +435,138 @@
     <div id="status"></div>
   </div>
 
-  <script>
-    const searchInput = document.getElementById("searchInput");
-    const searchBtn = document.getElementById("searchBtn");
-    const cardsEl = document.getElementById("cards");
-    const statusEl = document.getElementById("status");
+<script>
+  const searchInput = document.getElementById("searchInput");
+  const searchBtn = document.getElementById("searchBtn");
+  const cardsEl = document.getElementById("cards");
+  const statusEl = document.getElementById("status");
 
-    async function loadNotes(q = "") {
-      searchBtn.disabled = true;
-      searchBtn.innerHTML = '<span class="spinner"></span>';
-      statusEl.textContent = q ? `搜尋「${q}」中...` : "載入中...";
-      statusEl.style.display = 'block';
+  // 固定標籤清單（給 UI 判斷用）
+  const SYSTEM_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
+
+  async function loadNotes(q = "") {
+    searchBtn.disabled = true;
+    searchBtn.innerHTML = '<span class="spinner"></span>';
+    statusEl.textContent = q ? `搜尋「${q}」中...` : "載入中...";
+    statusEl.style.display = 'block';
+    cardsEl.innerHTML = "";
+
+    const params = q ? `?q=${encodeURIComponent(q)}` : "";
+    
+    try {
+      const res = await fetch(`/api/notes${params}`);
+      if (!res.ok) {
+        statusEl.textContent = "❌ 讀取失敗";
+        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+        searchBtn.disabled = false;
+        return;
+      }
+      const json = await res.json();
+      const data = json.data || [];
+
+      if (!data.length) {
+        statusEl.textContent = q ? `🔍 無符合結果` : "📭 暫無記錄";
+        cardsEl.innerHTML = '<div class="empty">試著新增一些對話記錄吧！</div>';
+        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+        searchBtn.disabled = false;
+        return;
+      }
+
+      statusEl.textContent = `共 ${data.length} 筆`;
       cardsEl.innerHTML = "";
 
-      const params = q ? `?q=${encodeURIComponent(q)}` : "";
-      
-      try {
-        const res = await fetch(`/api/notes${params}`);
-        if (!res.ok) {
-          statusEl.textContent = "❌ 讀取失敗";
-          searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
-          searchBtn.disabled = false;
-          return;
-        }
-        const json = await res.json();
-        const data = json.data || [];
+      data.forEach((row, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.animationDelay = `${index * 0.05}s`;
 
-        if (!data.length) {
-          statusEl.textContent = q ? `🔍 無符合結果` : "📭 暫無記錄";
-          cardsEl.innerHTML = '<div class="empty">試著新增一些對話記錄吧！</div>';
-          searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
-          searchBtn.disabled = false;
-          return;
-        }
+        // Title
+        const title = document.createElement("div");
+        title.className = "card-title";
+        title.textContent = row.title || "📝 無標題記錄";
 
-        statusEl.textContent = `共 ${data.length} 筆`;
-        cardsEl.innerHTML = "";
+        // Summary
+        const summary = document.createElement("div");
+        summary.className = "card-summary";
+        summary.textContent = row.summary || "暫無摘要內容";
 
-        data.forEach((row, index) => {
-          const card = document.createElement("div");
-          card.className = "card";
-          card.style.animationDelay = `${index * 0.05}s`;
+        // Tags
+        const tagsDiv = document.createElement("div");
+        tagsDiv.className = "card-tags";
+        const tags = Array.isArray(row.tags) ? row.tags : [];
 
-          const title = document.createElement("div");
-          title.className = "card-title";
-          title.textContent = row.title || "📝 無標題記錄";
+        tags.forEach(t => {
+          const span = document.createElement("span");
+          const isSystem = SYSTEM_TAGS.includes(t);
 
-          const summary = document.createElement("div");
-          summary.className = "card-summary";
-          summary.textContent = row.summary || "暫無摘要內容";
+          // 固定標籤 = 藍紫色 / 新增標籤 = 灰色
+          span.style.background = isSystem
+            ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)"
+            : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
 
-          const tagsDiv = document.createElement("div");
-          tagsDiv.className = "card-tags";
-          const tags = Array.isArray(row.tags)
-            ? row.tags
-            : (row.tags && typeof row.tags === "object" && row.tags.length ? row.tags : []);
-          if (tags && tags.length) {
-            tags.forEach(t => {
-              const span = document.createElement("span");
-              span.textContent = `#${t}`;
-              tagsDiv.appendChild(span);
-            });
-          }
+          span.style.color = isSystem ? "#5b21b6" : "#374151";
+          span.textContent = `#${t}`;
 
-          const meta = document.createElement("div");
-          meta.className = "card-meta";
-          const created = row.created_at
-            ? new Date(row.created_at).toLocaleString('zh-TW', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-              })
-            : "";
-          meta.innerHTML = `
-            <span class="meta-item">💬 ${row.tg_chat_id ?? 'N/A'}</span>
-            <span class="meta-item">👤 ${row.tg_user_id ?? 'N/A'}</span>
-            <span class="meta-item">🕐 ${created}</span>
-          `;
+          // 點擊標籤就搜尋該標籤
+          span.addEventListener("click", () => {
+            searchInput.value = t;
+            loadNotes(t);
+          });
 
-          const raw = document.createElement("div");
-          raw.className = "card-raw";
-          raw.textContent = row.raw_text || "無原始內容";
-
-          card.appendChild(title);
-          card.appendChild(summary);
-          if (tagsDiv.childNodes.length) card.appendChild(tagsDiv);
-          card.appendChild(meta);
-          card.appendChild(raw);
-
-          cardsEl.appendChild(card);
+          tagsDiv.appendChild(span);
         });
-      } catch (error) {
-        statusEl.textContent = "❌ 載入錯誤";
-        cardsEl.innerHTML = '<div class="empty">發生錯誤，請檢查網路連線</div>';
-      }
 
-      searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
-      searchBtn.disabled = false;
+        // meta — 只留時間
+        const meta = document.createElement("div");
+        meta.className = "card-meta";
+        const created = row.created_at
+          ? new Date(row.created_at).toLocaleString('zh-TW', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            })
+          : "";
+        meta.innerHTML = `<span class="meta-item">🕐 ${created}</span>`;
+
+        // Raw text
+        const raw = document.createElement("div");
+        raw.className = "card-raw";
+        raw.textContent = row.raw_text || "無原始內容";
+
+        // 組卡片
+        card.appendChild(title);
+        card.appendChild(summary);
+        if (tagsDiv.childNodes.length) card.appendChild(tagsDiv);
+        card.appendChild(meta);
+        card.appendChild(raw);
+
+        cardsEl.appendChild(card);
+      });
+    } catch (error) {
+      statusEl.textContent = "❌ 載入錯誤";
+      cardsEl.innerHTML = '<div class="empty">發生錯誤，請檢查網路連線</div>';
     }
 
-    // 初次載入
-    loadNotes();
+    searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+    searchBtn.disabled = false;
+  }
 
-    searchBtn.addEventListener("click", () => {
+  // 初次載入
+  loadNotes();
+
+  searchBtn.addEventListener("click", () => {
+    loadNotes(searchInput.value.trim());
+  });
+
+  // Enter 搜尋
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
       loadNotes(searchInput.value.trim());
-    });
+    }
+  });
+</script>
 
-    // Enter 直接搜尋
-    searchInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        loadNotes(searchInput.value.trim());
-      }
-    });
-  </script>
 </body>
 </html>
