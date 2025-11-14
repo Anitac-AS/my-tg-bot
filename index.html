@@ -218,13 +218,6 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     }
 
-    .card-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
     .card-title {
       font-weight: 700;
       font-size: 18px;
@@ -234,31 +227,6 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-    }
-
-    .card-actions {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-
-    .card-action-btn {
-      border: none;
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 11px;
-      cursor: pointer;
-      background: #f3f4f6;
-      color: #4b5563;
-      transition: all 0.2s ease;
-    }
-
-    .card-action-btn:hover {
-      background: #e5e7eb;
-    }
-
-    .card-action-btn.delete {
-      color: #b91c1c;
     }
 
     .card-summary {
@@ -396,7 +364,7 @@
       padding: 20px 24px;
       max-width: 720px;
       width: calc(100% - 40px);
-      max-height: 80vh;
+      max-height: 85vh;
       overflow: hidden;
       box-shadow: 0 20px 60px rgba(0,0,0,0.4);
       z-index: 1;
@@ -459,25 +427,13 @@
 
     /* Animations */
     @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes fadeIn {
@@ -486,14 +442,8 @@
     }
 
     @keyframes cardFadeIn {
-      from {
-        opacity: 0;
-        transform: scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     /* Loading Spinner */
@@ -511,7 +461,7 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Responsive */
+    /* Responsive：手機優化 sidebar & modal */
     @media (max-width: 768px) {
       .container {
         padding: 20px 16px;
@@ -546,11 +496,12 @@
 
       .sidebar {
         padding: 14px 12px;
-        overflow-x: auto;
+        overflow-x: visible;        /* 不再橫向捲動 */
       }
 
       .sidebar-tags {
-        flex-wrap: nowrap;
+        flex-wrap: wrap;            /* 手機版自動換行 */
+        gap: 8px;
       }
 
       /* 手機版移除搜尋圖示 */
@@ -582,7 +533,8 @@
 
       .modal-content {
         max-width: 100%;
-        width: calc(100% - 24px);
+        width: calc(100% - 24px);  /* 兩側各留一點空間 */
+        max-height: 90vh;          /* 高度控制在視窗內 */
       }
     }
 
@@ -749,68 +701,6 @@
       });
     }
 
-    async function handleDelete(row) {
-      const ok = window.confirm("確定要刪除這張卡片嗎？\n刪除後無法復原。");
-      if (!ok) return;
-
-      try {
-        const res = await fetch(`/api/notes?id=${encodeURIComponent(row.id)}`, {
-          method: "DELETE"
-        });
-        if (!res.ok) {
-          alert("刪除失敗，請稍後再試");
-          return;
-        }
-        // 刷新當前列表（維持搜尋／標籤狀態）
-        loadNotes(lastQuery);
-      } catch (e) {
-        console.error("Delete error:", e);
-        alert("刪除時發生錯誤");
-      }
-    }
-
-    async function handleEdit(row) {
-      const newTitle = window.prompt("編輯標題", row.title || "");
-      if (newTitle === null) return;
-
-      const newSummary = window.prompt("編輯摘要", row.summary || "");
-      if (newSummary === null) return;
-
-      const tagsStr = window.prompt(
-        "編輯標籤（以逗號分隔）",
-        Array.isArray(row.tags) ? row.tags.join(",") : ""
-      );
-      if (tagsStr === null) return;
-
-      const newTags = tagsStr
-        .split(",")
-        .map(t => t.trim())
-        .filter(Boolean);
-
-      try {
-        const res = await fetch("/api/notes", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: row.id,
-            title: newTitle,
-            summary: newSummary,
-            tags: newTags
-          })
-        });
-
-        if (!res.ok) {
-          alert("更新失敗，請稍後再試");
-          return;
-        }
-
-        loadNotes(lastQuery);
-      } catch (e) {
-        console.error("Edit error:", e);
-        alert("更新時發生錯誤");
-      }
-    }
-
     async function loadNotes(q = "") {
       lastQuery = q;
 
@@ -854,47 +744,15 @@
 
           // 點整張卡片 = 看原文 Modal
           card.addEventListener("click", (e) => {
-            // 如果點到的是按鈕或標籤，就不要觸發
-            if (e.target.closest(".card-action-btn") || e.target.closest(".card-tags span")) {
-              return;
-            }
+            // 如果點到的是標籤，就不要觸發（標籤自身會處理搜尋）
+            if (e.target.closest(".card-tags span")) return;
             openRawModal(row);
           });
-
-          // Header: 標題 + 編輯 / 刪除
-          const header = document.createElement("div");
-          header.className = "card-header";
 
           const title = document.createElement("div");
           title.className = "card-title";
           title.textContent = row.title || "📝 無標題記錄";
 
-          const actions = document.createElement("div");
-          actions.className = "card-actions";
-
-          const editBtn = document.createElement("button");
-          editBtn.className = "card-action-btn";
-          editBtn.textContent = "編輯";
-          editBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            handleEdit(row);
-          });
-
-          const deleteBtn = document.createElement("button");
-          deleteBtn.className = "card-action-btn delete";
-          deleteBtn.textContent = "刪除";
-          deleteBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            handleDelete(row);
-          });
-
-          actions.appendChild(editBtn);
-          actions.appendChild(deleteBtn);
-
-          header.appendChild(title);
-          header.appendChild(actions);
-
-          // Summary
           const summary = document.createElement("div");
           summary.className = "card-summary";
           summary.textContent = row.summary || "暫無摘要內容";
@@ -953,7 +811,7 @@
           raw.className = "card-raw";
           raw.textContent = row.raw_text || "無原始內容";
 
-          card.appendChild(header);
+          card.appendChild(title);
           card.appendChild(summary);
           if (tagsDiv.childNodes.length) card.appendChild(tagsDiv);
           card.appendChild(meta);
