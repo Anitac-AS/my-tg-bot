@@ -20,9 +20,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 解析 ?q= 關鍵字
+    // 解析 ?q= 關鍵字 以及 ?tag= 標籤  👇👇 這裡多抓一個 tag
     const url = new URL(req.url, `https://${req.headers.host}`);
-    const q = url.searchParams.get("q")?.trim() || "";
+    const q   = url.searchParams.get("q")?.trim()   || "";
+    const tag = url.searchParams.get("tag")?.trim() || "";
 
     let query = supabase
       .from("notes") // 如果你的表不是叫 notes，這裡改掉
@@ -30,12 +31,19 @@ export default async function handler(req, res) {
       .order("created_at", { ascending: false })
       .limit(50);
 
+    // 自由關鍵字搜尋：title / summary / raw_text
     if (q) {
-      // 用 ilike 搜尋 title / summary / raw_text
       const pattern = `%${q}%`;
       query = query.or(
         `title.ilike.${pattern},summary.ilike.${pattern},raw_text.ilike.${pattern}`
       );
+    }
+
+    // 標籤過濾：tags 為 jsonb 陣列，使用 contains
+    // 例如 tags 欄位內容為 ["美食","購物","地方特產"]
+    // ?tag=美食 會找到這一筆
+    if (tag) {
+      query = query.contains("tags", [tag]);
     }
 
     const { data, error } = await query;
