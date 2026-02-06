@@ -15,7 +15,7 @@ const SYSTEM_PROMPT = `
 }
 重要規則：
 1. 標籤請優先從以下固定列表中選 1~5 個最相關者：
-   ["教育","親子","AI","資訊","健康","旅遊","趣味","購物",興趣]
+   ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"]
 
 2. 若內容真的無法匹配上述分類，才允許新增新的標籤，但請控制在 1~2 個。
 
@@ -25,7 +25,7 @@ const SYSTEM_PROMPT = `
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// ====== Supabase 設定（Server 端）=====
+// ====== Supabase 設定 ======
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -34,10 +34,10 @@ const supabase = supabaseUrl && supabaseKey
   : null;
 
 if (!supabase) {
-  console.error("Supabase client not initialized. Check SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY.");
+  console.error("Supabase client not initialized.");
 }
 
-// ====== Telegram secret token 驗證（有設才會啟用）======
+// ====== Telegram 驗證 ======
 function verifyTelegramSecretToken(req) {
   const expected = process.env.TG_SECRET_TOKEN;
   if (!expected) return true;
@@ -45,169 +45,186 @@ function verifyTelegramSecretToken(req) {
   return typeof got === "string" && got === expected;
 }
 
-// ====== 回覆訊息給 Telegram ======
+// ====== Helper: 回覆 Telegram ======
 async function replyToTelegram({ chatId, text }) {
-  if (!process.env.BOT_TOKEN) {
-    console.error("Missing BOT_TOKEN env var");
-    return;
-  }
-
+  if (!process.env.BOT_TOKEN) return;
   const url = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendMessage`;
-  const body = {
-    chat_id: chatId,
-    text,
-    parse_mode: "HTML",
-    disable_web_page_preview: true,
-  };
-
-  const r = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!r.ok) {
-    const t = await r.text().catch(() => "");
-    console.error(`sendMessage failed: ${r.status} ${r.statusText} ${t || "(no body)"}`);
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
+      }),
+    });
+  } catch (e) {
+    console.error("Reply error:", e);
   }
 }
 
+// ====== Helper: 處理圖片上傳 (新增功能) ======
+async function handlePhotoUpload(fileId) {
+  try {
+    const token = process.env.BOT_TOKEN;
+    
+    // 1. 取得檔案路徑 (getFile)
+    const fileInfoRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`);
+    const fileInfo = await fileInfoRes.json();
+    
+    if (!fileInfo.ok || !fileInfo.result.file_path) {
+      throw new Error("Cannot get file path from Telegram");
+    }
+
+    const filePath = fileInfo.result.file_path;
+    const downloadUrl = `https://api.telegram.org/file/bot${token}/${filePath}`;
+
+    // 2. 下載檔案
+    const imgRes = await fetch(downloadUrl);
+    const arrayBuffer = await imgRes.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // 3. 上傳到 Supabase Storage
+    // 檔名加上 timestamp 避免重複： photos/1709234123_abcde.jpg
+    const ext = filePath.split('.').pop(); // 取得副檔名 (jpg/png)
+    const fileName = `photos/${Date.now()}_${fileId}.${ext}`;
+
+    const { data, error } = await supabase.storage
+      .from('assets') // 請確認 Bucket 名稱是 'assets'
+      .upload(fileName, buffer, {
+        contentType: `image/${ext}`,
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    // 4. 取得公開網址
+    const { data: publicData } = supabase.storage
+      .from('assets')
+      .getPublicUrl(fileName);
+
+    return publicData.publicUrl;
+
+  } catch (err) {
+    console.error("Image upload failed:", err);
+    return null; // 上傳失敗回傳 null，但不中斷流程
+  }
+}
+
+
 // ====== Webhook 主處理器 ======
 export default async function handler(req, res) {
-  let chatId; // 給 catch 用
+  let chatId;
 
   try {
-    console.log("Node version:", process.version);
-
-    if (req.method !== "POST") {
-      return res.status(405).send("Method Not Allowed");
-    }
-
-    if (!process.env.GEMINI_API_KEY) {
-      console.error("Missing GEMINI_API_KEY env var");
-      return res.status(500).send("GEMINI_API_KEY not configured");
-    }
-    if (!process.env.BOT_TOKEN) {
-      console.error("Missing BOT_TOKEN env var");
-      return res.status(500).send("BOT_TOKEN not configured");
-    }
-
-    console.log("GenAI model name (SDK):", MODEL_NAME);
-
-    // Secret token 驗證
-    if (!verifyTelegramSecretToken(req)) {
-      console.warn("Invalid x-telegram-bot-api-secret-token");
-      return res.status(401).send("Unauthorized");
-    }
-
-    console.log(
-      "TELEGRAM_WEBHOOK_PAYLOAD:",
-      JSON.stringify(req.body, null, 2)
-    );
+    if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+    if (!verifyTelegramSecretToken(req)) return res.status(401).send("Unauthorized");
 
     const msg = req.body?.message || req.body?.edited_message;
-    chatId = msg?.chat?.id;
-    const messageText = msg?.text;
+    if (!msg) return res.status(200).send("OK");
 
-    if (!chatId) {
-      console.log("No chatId. Just ACK.");
-      return res.status(200).send("OK");
+    chatId = msg.chat.id;
+
+    // === 修改點 1: 判斷輸入來源 (純文字 或 圖片+圖說) ===
+    let messageText = "";
+    let attachments = []; // 準備存入 DB 的附件欄位
+
+    // 情境 A: 純文字
+    if (msg.text) {
+      messageText = msg.text;
+    } 
+    // 情境 B: 圖片 (Photo)
+    else if (msg.photo) {
+      // 圖片通常是一個 array，最後一張解析度最高
+      const bestPhoto = msg.photo[msg.photo.length - 1];
+      
+      // 嘗試上傳圖片
+      console.log("Processing photo...");
+      const publicUrl = await handlePhotoUpload(bestPhoto.file_id);
+      
+      if (publicUrl) {
+        attachments.push({
+          type: "image",
+          url: publicUrl,
+          width: bestPhoto.width,
+          height: bestPhoto.height
+        });
+      }
+
+      // 取得圖說 (Caption) 作為 AI 分析的文字
+      messageText = msg.caption || ""; 
     }
 
-    if (!messageText || !messageText.trim()) {
-      console.log("No text message found. Skipping AI.");
-      await replyToTelegram({
-        chatId,
-        text: "我目前只處理純文字訊息喔～可以直接貼一段文字給我整理。",
-      });
-      return res.status(200).send("OK");
+    // 若完全沒有文字 (純圖無圖說 或 不支援的格式)
+    if (!messageText.trim()) {
+      if (attachments.length > 0) {
+        // 有圖但沒字 -> 還是存進去，但 title/summary 可能需要預設值
+        messageText = "(這張圖片沒有附帶說明)";
+      } else {
+        await replyToTelegram({ chatId, text: "我需要文字或帶有文字說明的圖片喔！" });
+        return res.status(200).send("OK");
+      }
     }
 
-    console.log("Sending to Gemini (SDK):", messageText);
-
+    // ====== AI 分析 ======
+    console.log("Analyze:", messageText);
     const model = genAI.getGenerativeModel({
       model: MODEL_NAME,
       systemInstruction: SYSTEM_PROMPT,
-      generationConfig: {
-        responseMimeType: "application/json",
-      },
+      generationConfig: { responseMimeType: "application/json" },
     });
 
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: messageText }] }],
     });
 
-    const raw = result.response.text();
-    console.log("GEMINI_RESPONSE_RAW:", raw);
-
     let parsed;
     try {
-      parsed = JSON.parse(raw);
+      parsed = JSON.parse(result.response.text());
     } catch (e) {
-      console.error("AI returned non-JSON:", raw);
-      await replyToTelegram({
-        chatId,
-        text: "抱歉，我拿到的 AI 回覆不是有效的 JSON，請再試一次或換一段文字。",
-      });
-      return res.status(200).send("OK");
+      console.error("AI JSON Parse Error");
+      // 若 JSON 解析失敗，還是將資料存入，避免丟失
+      parsed = { title: "AI 解析失敗", summary: messageText, tags: [] };
     }
-
-    console.log("GEMINI_RESPONSE_JSON:", parsed);
 
     // ====== 寫入 Supabase ======
     if (supabase) {
-      try {
-        const from = msg?.from || {};
+      const { error: dbError } = await supabase
+        .from("notes")
+        .insert({
+          tg_chat_id: chatId,
+          tg_user_id: msg.from?.id ?? null,
+          title: parsed.title,
+          summary: parsed.summary,
+          tags: parsed.tags,
+          raw_text: messageText,      // 存入的文字 (若是圖片則是 caption)
+          attachments: attachments,   // === 修改點 2: 存入 attachments JSONB ===
+          created_at: new Date().toISOString(),
+        });
 
-        const { error: dbError } = await supabase
-          .from("notes") // 如果你的表名不是 notes，這裡改掉
-          .insert({
-            tg_chat_id: chatId,
-            tg_user_id: from.id ?? null,
-            title: parsed.title ?? null,
-            summary: parsed.summary ?? null,
-            tags: parsed.tags ?? null,   // jsonb 欄位
-            raw_text: messageText,
-            created_at: new Date().toISOString(),
-          });
-
-        if (dbError) {
-          console.error("Supabase insert error:", dbError);
-        } else {
-          console.log("Supabase insert success");
-        }
-      } catch (e) {
-        console.error("Supabase insert exception:", e);
-      }
-    } else {
-      console.warn("Supabase not initialized, skip insert.");
+      if (dbError) console.error("DB Insert Error:", dbError);
     }
 
     // ====== 回覆 Telegram ======
+    // 若有圖片，可以在回覆中加個標記 ✅
+    const hasImg = attachments.length > 0 ? " [包含圖片]" : "";
+    
     const pretty = [
-      `🧠 <b>AI 摘要完成</b>`,
+      `🧠 <b>AI 歸檔完成${hasImg}</b>`,
       `\n<b>標題</b>：${parsed.title ?? ""}`,
       `\n<b>摘要</b>：${parsed.summary ?? ""}`,
-      `\n<b>標籤</b>：${
-        Array.isArray(parsed.tags) ? parsed.tags.join(", ") : ""
-      }`,
+      `\n<b>標籤</b>：${Array.isArray(parsed.tags) ? parsed.tags.join(", ") : ""}`,
     ].join("");
 
     await replyToTelegram({ chatId, text: pretty });
 
     return res.status(200).send("OK");
-  } catch (error) {
-    console.error("Error processing webhook:", error);
 
-    if (chatId) {
-      await replyToTelegram({
-        chatId,
-        text: "呼叫 AI 服務發生錯誤，已紀錄詳情。",
-      });
-    }
-    // 為了避免 Telegram 一直重送，這裡還是回 200
+  } catch (error) {
+    console.error("Handler Error:", error);
+    if (chatId) await replyToTelegram({ chatId, text: "系統發生錯誤，請稍後再試。" });
     return res.status(200).send("OK");
   }
 }
-
-
