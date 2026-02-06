@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="/favicon.png" type="image/png" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", 
@@ -58,15 +56,9 @@
       animation: fadeInUp 0.6s ease;
     }
 
-    .search-bar {
-      display: flex;
-      gap: 12px;
-    }
+    .search-bar { display: flex; gap: 12px; }
 
-    .search-input-wrapper {
-      flex: 1;
-      position: relative;
-    }
+    .search-input-wrapper { flex: 1; position: relative; }
 
     .search-icon {
       position: absolute;
@@ -112,18 +104,15 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
     }
-
-    .search-bar button:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
+    
+    .search-bar button:active:not(:disabled) { transform: translateY(0); }
     .search-bar button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       transform: none;
     }
 
-    /* Layout with sidebar */
+    /* Layout */
     .layout {
       display: grid;
       grid-template-columns: 240px minmax(0, 1fr);
@@ -134,6 +123,7 @@
       overflow: hidden;
     }
 
+    /* Sidebar Optimized */
     .sidebar {
       background: rgba(255,255,255,0.95);
       backdrop-filter: blur(10px);
@@ -155,8 +145,28 @@
 
     .sidebar-tags {
       display: flex;
+      flex-direction: column; /* 改為垂直排列容器，方便做收折區塊 */
+      gap: 8px;
+    }
+
+    .tags-group {
+      display: flex;
       flex-wrap: wrap;
       gap: 8px;
+    }
+
+    /* 隱藏區塊預設樣式 */
+    .tags-hidden-area {
+      display: none; /* 預設隱藏 */
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+      padding-top: 8px;
+      border-top: 1px solid #e5e7eb;
+    }
+    
+    .tags-hidden-area.show {
+      display: flex; /* 展開時顯示 */
     }
 
     .sidebar-tag {
@@ -171,9 +181,7 @@
       white-space: nowrap;
     }
 
-    .sidebar-tag:hover {
-      background: #e5e7eb;
-    }
+    .sidebar-tag:hover { background: #e5e7eb; }
 
     .sidebar-tag.active {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -181,11 +189,21 @@
       box-shadow: 0 3px 10px rgba(79,70,229,0.4);
     }
 
-    .main {
-      min-width: 0;
-      width: 100%;
-      overflow: hidden;
+    /* 展開/收合按鈕 */
+    .sidebar-toggle-btn {
+      background: none;
+      border: none;
+      color: #667eea;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 0;
+      text-align: left;
+      margin-top: 4px;
     }
+    .sidebar-toggle-btn:hover { text-decoration: underline; }
+
+    .main { min-width: 0; width: 100%; overflow: hidden; }
 
     .empty {
       text-align: center;
@@ -195,7 +213,7 @@
       animation: fadeIn 0.6s ease;
     }
 
-    /* Cards Grid */
+    /* Cards */
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -227,10 +245,9 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     }
 
-    /* === 圖片樣式 (新增) === */
     .card-img {
       width: 100%;
-      height: 180px; /* 卡片縮圖高度 */
+      height: 180px;
       object-fit: cover;
       border-radius: 12px;
       margin-bottom: 4px;
@@ -260,12 +277,7 @@
       overflow: hidden;
     }
 
-    .card-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
-    }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 
     .card-tags span {
       display: inline-flex;
@@ -295,12 +307,6 @@
       gap: 8px;
     }
 
-    .meta-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
     .card-raw {
       font-size: 13px;
       color: #6b7280;
@@ -314,24 +320,11 @@
       overflow-y: auto;
       line-height: 1.5;
     }
-
-    .card-raw::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .card-raw::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 4px;
-    }
-
-    .card-raw::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
-    }
-
-    .card-raw::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
+    
+    .card-raw::-webkit-scrollbar { width: 6px; }
+    .card-raw::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+    .card-raw::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .card-raw::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
     /* Status Bar */
     .status-bar {
@@ -352,12 +345,9 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       transition: all 0.3s ease;
     }
+    #status:hover { background: rgba(0,0,0,0.7); }
 
-    #status:hover {
-      background: rgba(0,0,0,0.7);
-    }
-
-    /* Modal for raw_text */
+    /* Modal */
     .modal {
       position: fixed;
       inset: 0;
@@ -366,10 +356,7 @@
       justify-content: center;
       z-index: 2000;
     }
-
-    .modal.open {
-      display: flex;
-    }
+    .modal.open { display: flex; }
 
     .modal-backdrop {
       position: absolute;
@@ -395,11 +382,18 @@
       animation: fadeInUp 0.3s ease;
     }
 
+    .modal-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-right: 32px; /* 避開關閉按鈕 */
+    }
+
     .modal-title {
       font-size: 18px;
       font-weight: 700;
       color: #111827;
-      margin-right: 32px;
+      word-wrap: break-word;
     }
 
     .modal-time {
@@ -408,15 +402,15 @@
       margin-bottom: 4px;
     }
 
-    /* === Modal 圖片樣式 (新增) === */
     .modal-img-wrapper {
       margin-top: 8px;
       display: flex;
       flex-direction: column;
       gap: 12px;
       overflow-y: auto;
-      max-height: 40vh; /* 限制圖片區域高度，避免擠壓文字 */
+      max-height: 35vh;
       padding-right: 4px;
+      flex-shrink: 0;
     }
 
     .modal-img {
@@ -426,10 +420,38 @@
       border: 1px solid #e5e7eb;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    /* =========================== */
+
+    /* 複製按鈕區塊 */
+    .raw-tools {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+    
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #4b5563;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { background: #f3f4f6; color: #111827; border-color: #9ca3af; }
+    .copy-btn:active { transform: translateY(1px); }
+    .copy-btn.copied {
+      background: #10b981;
+      color: white;
+      border-color: #059669;
+    }
 
     .modal-raw {
-      margin-top: 8px;
       font-size: 14px;
       color: #111827;
       white-space: pre-wrap;
@@ -442,15 +464,9 @@
       flex: 1; /* 佔滿剩餘高度 */
     }
 
-    .modal-raw::-webkit-scrollbar,
-    .modal-img-wrapper::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .modal-raw::-webkit-scrollbar-thumb,
-    .modal-img-wrapper::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 4px;
+    .modal-raw::-webkit-scrollbar, .modal-img-wrapper::-webkit-scrollbar { width: 8px; }
+    .modal-raw::-webkit-scrollbar-thumb, .modal-img-wrapper::-webkit-scrollbar-thumb {
+      background: #cbd5e1; border-radius: 4px;
     }
 
     .modal-close {
@@ -463,33 +479,15 @@
       cursor: pointer;
       color: #6b7280;
     }
-
-    .modal-close:hover {
-      color: #111827;
-    }
+    .modal-close:hover { color: #111827; }
 
     /* Animations */
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes cardFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes cardFadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    /* Loading Spinner */
     .spinner {
       display: inline-block;
       width: 14px;
@@ -500,55 +498,26 @@
       animation: spin 0.8s linear infinite;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
     /* Responsive */
     @media (max-width: 768px) {
       .container { padding: 20px 16px; }
       h1 { font-size: 28px; }
-      .subtitle { font-size: 14px; }
       .search-wrapper { padding: 20px; }
       .search-bar { flex-direction: column; }
       .search-bar button { width: 100%; padding: 14px 20px; }
-      
       .layout { display: flex; flex-direction: column; gap: 16px; }
       .sidebar { width: 100%; padding: 14px 16px; }
-      .sidebar-tags { flex-wrap: wrap; gap: 8px; }
-      .main { width: 100%; }
+      .sidebar-tags { flex-direction: column; gap: 8px; }
       .search-icon { display: none; }
       .search-bar input { padding: 14px 20px; }
-      
       .cards { grid-template-columns: 1fr; padding-bottom: 100px; width: 100%; }
       .card { width: 100%; max-width: 100%; padding: 16px; }
-      
-      .status-bar { bottom: 16px; right: 16px; left: 16px; }
-      #status { text-align: center; display: block; font-size: 12px; padding: 8px 12px; }
-      
-      .modal-content {
-        width: calc(100vw - 32px);
-        max-width: calc(100vw - 32px);
-        max-height: 85vh;
-        margin: 0 16px;
-      }
-      .modal-title { font-size: 16px; padding-right: 32px; word-wrap: break-word; }
-      .modal-raw { font-size: 13px; word-wrap: break-word; overflow-wrap: break-word; }
+      .modal-content { width: calc(100vw - 32px); max-width: calc(100vw - 32px); max-height: 85vh; margin: 0 16px; }
     }
-
     @media (max-width: 480px) {
       .container { padding: 16px 12px; }
       h1 { font-size: 24px; }
-      .search-wrapper { padding: 16px; }
-      .card { padding: 14px; }
-      .sidebar { padding: 12px; }
-      .sidebar-tag { font-size: 12px; padding: 5px 10px; }
-      .modal-content {
-        width: calc(100vw - 24px);
-        max-width: calc(100vw - 24px);
-        margin: 0 12px;
-        padding: 16px;
-      }
+      .modal-content { width: calc(100vw - 24px); max-width: calc(100vw - 24px); margin: 0 12px; padding: 16px; }
     }    
   </style>
 </head>
@@ -588,18 +557,28 @@
     </div>
   </div>
 
-  <div class="status-bar">
-    <div id="status"></div>
-  </div>
+  <div class="status-bar"><div id="status"></div></div>
 
   <div id="rawModal" class="modal">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <button id="modalClose" class="modal-close">&times;</button>
-      <div class="modal-title" id="modalTitle"></div>
+      
+      <div class="modal-header-row">
+        <div class="modal-title" id="modalTitle"></div>
+      </div>
       <div class="modal-time" id="modalTime"></div>
       
       <div id="modalImages" class="modal-img-wrapper"></div>
+
+      <div class="raw-tools">
+        <button id="copyBtn" class="copy-btn">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
+          </svg>
+          複製內容
+        </button>
+      </div>
 
       <div class="modal-raw" id="modalRaw"></div>
     </div>
@@ -616,40 +595,64 @@
   const modalTitle = document.getElementById("modalTitle");
   const modalTime = document.getElementById("modalTime");
   const modalRaw = document.getElementById("modalRaw");
-  const modalImages = document.getElementById("modalImages"); // 新增
+  const modalImages = document.getElementById("modalImages");
   const modalClose = document.getElementById("modalClose");
+  const copyBtn = document.getElementById("copyBtn");
 
-  // 固定標籤清單
   const SYSTEM_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
-
   let activeTag = "";    
   let currentQuery = ""; 
+  let currentRawText = ""; // 暫存當前開啟的文字供複製用
 
-  /* ========= Modal：顯示完整 raw_text 與圖片 ========= */
+  /* ========= 一鍵複製功能 ========= */
+  copyBtn.addEventListener("click", () => {
+    if (!currentRawText) return;
+    
+    navigator.clipboard.writeText(currentRawText).then(() => {
+      // 視覺回饋
+      const originalHtml = copyBtn.innerHTML;
+      copyBtn.classList.add("copied");
+      copyBtn.innerHTML = `
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg> 已複製
+      `;
+      
+      // 2秒後復原
+      setTimeout(() => {
+        copyBtn.classList.remove("copied");
+        copyBtn.innerHTML = originalHtml;
+      }, 2000);
+    }).catch(err => {
+      console.error('複製失敗:', err);
+      statusEl.textContent = "❌ 複製失敗";
+      statusEl.style.display = 'block';
+    });
+  });
 
+  /* ========= Modal ========= */
   function openRawModal(row) {
     modalTitle.textContent = row.title || "📝 無標題記錄";
-    modalRaw.textContent = row.raw_text || "無原始內容";
+    
+    // 設定全域變數供複製使用
+    currentRawText = row.raw_text || "";
+    modalRaw.textContent = currentRawText || "無原始內容";
 
     const created = row.created_at
       ? new Date(row.created_at).toLocaleString("zh-TW", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit",
         })
       : "";
     modalTime.textContent = created ? `建立時間：${created}` : "";
 
-    // === 新增：渲染 Modal 圖片 ===
-    modalImages.innerHTML = ""; // 先清空舊圖
+    // 渲染圖片
+    modalImages.innerHTML = "";
     if (row.attachments && Array.isArray(row.attachments)) {
       row.attachments.forEach(att => {
         if (att.type === 'image') {
           const img = document.createElement("img");
           img.className = "modal-img";
-          // 使用 Supabase Transform 優化載入，但保持高畫質 (width=800)
           img.src = `${att.url}?width=800`; 
           modalImages.appendChild(img);
         }
@@ -662,42 +665,36 @@
   function closeRawModal() {
     rawModal.classList.remove("open");
   }
-
   modalClose.addEventListener("click", closeRawModal);
   rawModal.addEventListener("click", (e) => {
-    if (e.target === rawModal || e.target.classList.contains("modal-backdrop")) {
-      closeRawModal();
-    }
+    if (e.target === rawModal || e.target.classList.contains("modal-backdrop")) closeRawModal();
   });
 
-  /* ========= Sidebar 標籤 ========= */
-
+  /* ========= Sidebar 標籤邏輯 (Top 5 + Collapse) ========= */
   function buildSidebarTags(rows) {
     const tagCounts = new Map();
-
     rows.forEach((row) => {
       const tags = Array.isArray(row.tags) ? row.tags : [];
-      tags.forEach((t) => {
-        tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
-      });
+      tags.forEach((t) => tagCounts.set(t, (tagCounts.get(t) || 0) + 1));
     });
 
     sidebarTagsEl.innerHTML = "";
 
+    // 1. 全部按鈕
+    const topGroup = document.createElement("div");
+    topGroup.className = "tags-group";
+    
     const allBtn = document.createElement("button");
     allBtn.className = "sidebar-tag";
     allBtn.textContent = "全部";
-    if (!activeTag && !currentQuery) {
-      allBtn.classList.add("active");
-    }
+    if (!activeTag && !currentQuery) allBtn.classList.add("active");
     allBtn.addEventListener("click", () => {
-      activeTag = "";
-      currentQuery = "";
-      searchInput.value = "";
+      activeTag = ""; currentQuery = ""; searchInput.value = "";
       loadNotes("", "");
     });
-    sidebarTagsEl.appendChild(allBtn);
+    topGroup.appendChild(allBtn);
 
+    // 2. 排序標籤
     const sortedTags = Array.from(tagCounts.entries()).sort(
       ([tagA, countA], [tagB, countB]) => {
         if (countA !== countB) return countB - countA;
@@ -705,37 +702,75 @@
       }
     );
 
-    sortedTags.forEach(([tag]) => {
-      const btn = document.createElement("button");
-      btn.className = "sidebar-tag";
-      btn.textContent = tag;
-      if (activeTag === tag) {
-        btn.classList.add("active");
-      }
+    // 3. 分割：前5個 vs 剩餘
+    const topTags = sortedTags.slice(0, 5);
+    const hiddenTags = sortedTags.slice(5);
 
-      btn.addEventListener("click", () => {
-        if (activeTag === tag) {
-          activeTag = "";
-          currentQuery = "";
-          searchInput.value = "";
-          loadNotes("", "");
+    // 渲染 Top 5
+    topTags.forEach(([tag]) => {
+      const btn = createTagBtn(tag);
+      topGroup.appendChild(btn);
+    });
+    sidebarTagsEl.appendChild(topGroup);
+
+    // 4. 處理剩餘標籤 (如果有)
+    if (hiddenTags.length > 0) {
+      // 更多...按鈕
+      const toggleBtn = document.createElement("button");
+      toggleBtn.className = "sidebar-toggle-btn";
+      toggleBtn.textContent = `查看更多 (${hiddenTags.length})`;
+      
+      // 隱藏區塊
+      const hiddenArea = document.createElement("div");
+      hiddenArea.className = "tags-hidden-area";
+      
+      hiddenTags.forEach(([tag]) => {
+        const btn = createTagBtn(tag);
+        hiddenArea.appendChild(btn);
+      });
+
+      // 切換邏輯
+      toggleBtn.addEventListener("click", () => {
+        const isHidden = !hiddenArea.classList.contains("show");
+        if (isHidden) {
+          hiddenArea.classList.add("show");
+          toggleBtn.textContent = "收起標籤";
         } else {
-          activeTag = tag;
-          currentQuery = "";
-          searchInput.value = tag;
-          loadNotes("", tag);
+          hiddenArea.classList.remove("show");
+          toggleBtn.textContent = `查看更多 (${hiddenTags.length})`;
         }
       });
 
-      sidebarTagsEl.appendChild(btn);
-    });
+      sidebarTagsEl.appendChild(hiddenArea);
+      sidebarTagsEl.appendChild(toggleBtn);
+      
+      // 若目前 activeTag 在隱藏區，自動展開
+      const activeInHidden = hiddenTags.some(([t]) => t === activeTag);
+      if (activeInHidden) {
+        hiddenArea.classList.add("show");
+        toggleBtn.textContent = "收起標籤";
+      }
+    }
   }
 
-  /* ========= 主資料載入：支援 q + tag + attachments ========= */
+  function createTagBtn(tag) {
+    const btn = document.createElement("button");
+    btn.className = "sidebar-tag";
+    btn.textContent = tag;
+    if (activeTag === tag) btn.classList.add("active");
+    btn.addEventListener("click", () => {
+      if (activeTag === tag) {
+        activeTag = ""; currentQuery = ""; searchInput.value = ""; loadNotes("", "");
+      } else {
+        activeTag = tag; currentQuery = ""; searchInput.value = tag; loadNotes("", tag);
+      }
+    });
+    return btn;
+  }
 
+  /* ========= 主資料載入 ========= */
   async function loadNotes(q = "", tag = "") {
     currentQuery = q;
-
     searchBtn.disabled = true;
     searchBtn.innerHTML = '<span class="spinner"></span>';
     statusEl.textContent = q || tag ? "搜尋中..." : "載入中...";
@@ -743,22 +778,13 @@
     cardsEl.innerHTML = "";
 
     const params = new URLSearchParams();
-    if (q)   params.set("q", q);
+    if (q) params.set("q", q);
     if (tag) params.set("tag", tag);
-
-    const url = params.toString()
-      ? `/api/notes?${params.toString()}`
-      : "/api/notes";
+    const url = params.toString() ? `/api/notes?${params.toString()}` : "/api/notes";
 
     try {
       const res = await fetch(url);
-      if (!res.ok) {
-        statusEl.textContent = "❌ 讀取失敗";
-        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
-        searchBtn.disabled = false;
-        return;
-      }
-
+      if (!res.ok) throw new Error("API Error");
       const json = await res.json();
       const data = json.data || [];
 
@@ -766,8 +792,7 @@
 
       if (!data.length) {
         statusEl.textContent = (q || tag) ? "🔍 無符合結果" : "📭 暫無記錄";
-        cardsEl.innerHTML =
-          '<div class="empty">試著新增一些對話記錄吧！</div>';
+        cardsEl.innerHTML = '<div class="empty">試著新增一些對話記錄吧！</div>';
         searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
         searchBtn.disabled = false;
         return;
@@ -780,82 +805,59 @@
         const card = document.createElement("div");
         card.className = "card";
         card.style.animationDelay = `${index * 0.05}s`;
-
+        
         card.addEventListener("click", (e) => {
           if (e.target.closest(".card-tags span")) return;
           openRawModal(row);
         });
 
-        // === 新增：卡片封面圖 ===
+        // Image
         if (row.attachments && Array.isArray(row.attachments) && row.attachments.length > 0) {
           const firstImg = row.attachments.find(a => a.type === 'image');
           if (firstImg) {
             const imgEl = document.createElement("img");
             imgEl.className = "card-img";
-            // 使用縮圖優化列表效能
             imgEl.src = `${firstImg.url}?width=400`; 
             imgEl.loading = "lazy";
             card.appendChild(imgEl);
           }
         }
 
-        // 標題
         const title = document.createElement("div");
         title.className = "card-title";
         title.textContent = row.title || "📝 無標題記錄";
 
-        // 摘要
         const summary = document.createElement("div");
         summary.className = "card-summary";
         summary.textContent = row.summary || "暫無摘要內容";
 
-        // Tags
         const tagsDiv = document.createElement("div");
         tagsDiv.className = "card-tags";
         const tags = Array.isArray(row.tags) ? row.tags : [];
-
         tags.forEach((t) => {
           const span = document.createElement("span");
           const isSystem = SYSTEM_TAGS.includes(t);
-          span.style.background = isSystem
-            ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)"
-            : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
+          span.style.background = isSystem ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)" : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
           span.style.color = isSystem ? "#5b21b6" : "#374151";
           span.textContent = `#${t}`;
-
           span.addEventListener("click", (e) => {
             e.stopPropagation(); 
             if (activeTag === t) {
-              activeTag = "";
-              currentQuery = "";
-              searchInput.value = "";
-              loadNotes("", "");
+              activeTag = ""; currentQuery = ""; searchInput.value = ""; loadNotes("", "");
             } else {
-              activeTag = t;
-              currentQuery = "";
-              searchInput.value = t;
-              loadNotes("", t);
+              activeTag = t; currentQuery = ""; searchInput.value = t; loadNotes("", t);
             }
           });
-
           tagsDiv.appendChild(span);
         });
 
-        // meta
         const meta = document.createElement("div");
         meta.className = "card-meta";
-        const created = row.created_at
-          ? new Date(row.created_at).toLocaleString("zh-TW", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-            })
-          : "";
+        const created = row.created_at ? new Date(row.created_at).toLocaleString("zh-TW", {
+           year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"
+        }) : "";
         meta.innerHTML = `<span class="meta-item">🕐 ${created}</span>`;
 
-        // 原文預覽
         const raw = document.createElement("div");
         raw.className = "card-raw";
         raw.textContent = row.raw_text || "無原始內容";
@@ -865,35 +867,25 @@
         if (tagsDiv.childNodes.length) card.appendChild(tagsDiv);
         card.appendChild(meta);
         card.appendChild(raw);
-
         cardsEl.appendChild(card);
       });
     } catch (error) {
       console.error(error);
       statusEl.textContent = "❌ 載入錯誤";
-      cardsEl.innerHTML =
-        '<div class="empty">發生錯誤，請檢查網路連線</div>';
+      cardsEl.innerHTML = '<div class="empty">發生錯誤，請檢查網路連線</div>';
     }
-
     searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
     searchBtn.disabled = false;
   }
 
-  // Init
   loadNotes("", "");
 
-  // Events
   searchBtn.addEventListener("click", () => {
-    activeTag = "";
-    const q = searchInput.value.trim();
-    loadNotes(q, "");
+    activeTag = ""; const q = searchInput.value.trim(); loadNotes(q, "");
   });
-
   searchInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
-      activeTag = "";
-      const q = searchInput.value.trim();
-      loadNotes(q, "");
+      activeTag = ""; const q = searchInput.value.trim(); loadNotes(q, "");
     }
   });
 </script>
