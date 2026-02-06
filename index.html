@@ -350,4 +350,552 @@
       padding: 10px 16px;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transition: all
+      transition: all 0.3s ease;
+    }
+
+    #status:hover {
+      background: rgba(0,0,0,0.7);
+    }
+
+    /* Modal for raw_text */
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15,23,42,0.55);
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-content {
+      position: relative;
+      background: #f9fafb;
+      border-radius: 16px;
+      padding: 20px 24px;
+      max-width: 720px;
+      width: calc(100% - 40px);
+      max-height: 85vh;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+      margin-right: 32px;
+    }
+
+    .modal-time {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    /* === Modal 圖片樣式 (新增) === */
+    .modal-img-wrapper {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      max-height: 40vh; /* 限制圖片區域高度，避免擠壓文字 */
+      padding-right: 4px;
+    }
+
+    .modal-img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    /* =========================== */
+
+    .modal-raw {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #111827;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      padding: 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      overflow-y: auto;
+      flex: 1; /* 佔滿剩餘高度 */
+    }
+
+    .modal-raw::-webkit-scrollbar,
+    .modal-img-wrapper::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .modal-raw::-webkit-scrollbar-thumb,
+    .modal-img-wrapper::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      border: none;
+      background: transparent;
+      font-size: 20px;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .modal-close:hover {
+      color: #111827;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes cardFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 20px 16px; }
+      h1 { font-size: 28px; }
+      .subtitle { font-size: 14px; }
+      .search-wrapper { padding: 20px; }
+      .search-bar { flex-direction: column; }
+      .search-bar button { width: 100%; padding: 14px 20px; }
+      
+      .layout { display: flex; flex-direction: column; gap: 16px; }
+      .sidebar { width: 100%; padding: 14px 16px; }
+      .sidebar-tags { flex-wrap: wrap; gap: 8px; }
+      .main { width: 100%; }
+      .search-icon { display: none; }
+      .search-bar input { padding: 14px 20px; }
+      
+      .cards { grid-template-columns: 1fr; padding-bottom: 100px; width: 100%; }
+      .card { width: 100%; max-width: 100%; padding: 16px; }
+      
+      .status-bar { bottom: 16px; right: 16px; left: 16px; }
+      #status { text-align: center; display: block; font-size: 12px; padding: 8px 12px; }
+      
+      .modal-content {
+        width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
+        max-height: 85vh;
+        margin: 0 16px;
+      }
+      .modal-title { font-size: 16px; padding-right: 32px; word-wrap: break-word; }
+      .modal-raw { font-size: 13px; word-wrap: break-word; overflow-wrap: break-word; }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 16px 12px; }
+      h1 { font-size: 24px; }
+      .search-wrapper { padding: 16px; }
+      .card { padding: 14px; }
+      .sidebar { padding: 12px; }
+      .sidebar-tag { font-size: 12px; padding: 5px 10px; }
+      .modal-content {
+        width: calc(100vw - 24px);
+        max-width: calc(100vw - 24px);
+        margin: 0 12px;
+        padding: 16px;
+      }
+    }    
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⭐ Shu's MyMind</h1>
+      <div class="subtitle">填充、歸納、壯大、使用</div>
+    </div>
+
+    <div class="search-wrapper">
+      <div class="search-bar">
+        <div class="search-input-wrapper">
+          <div class="search-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <input id="searchInput" type="text" placeholder="搜尋標題、摘要或內容..." />
+        </div>
+        <button id="searchBtn">
+          <span class="btn-text">搜尋</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-title">📂 標籤分類</div>
+        <div id="sidebarTags" class="sidebar-tags"></div>
+      </aside>
+
+      <main class="main">
+        <div id="cards" class="cards"></div>
+      </main>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div id="status"></div>
+  </div>
+
+  <div id="rawModal" class="modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button id="modalClose" class="modal-close">&times;</button>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-time" id="modalTime"></div>
+      
+      <div id="modalImages" class="modal-img-wrapper"></div>
+
+      <div class="modal-raw" id="modalRaw"></div>
+    </div>
+  </div>
+
+<script>
+  const searchInput = document.getElementById("searchInput");
+  const searchBtn = document.getElementById("searchBtn");
+  const cardsEl = document.getElementById("cards");
+  const statusEl = document.getElementById("status");
+  const sidebarTagsEl = document.getElementById("sidebarTags");
+
+  const rawModal = document.getElementById("rawModal");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalTime = document.getElementById("modalTime");
+  const modalRaw = document.getElementById("modalRaw");
+  const modalImages = document.getElementById("modalImages"); // 新增
+  const modalClose = document.getElementById("modalClose");
+
+  // 固定標籤清單
+  const SYSTEM_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
+
+  let activeTag = "";    
+  let currentQuery = ""; 
+
+  /* ========= Modal：顯示完整 raw_text 與圖片 ========= */
+
+  function openRawModal(row) {
+    modalTitle.textContent = row.title || "📝 無標題記錄";
+    modalRaw.textContent = row.raw_text || "無原始內容";
+
+    const created = row.created_at
+      ? new Date(row.created_at).toLocaleString("zh-TW", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
+    modalTime.textContent = created ? `建立時間：${created}` : "";
+
+    // === 新增：渲染 Modal 圖片 ===
+    modalImages.innerHTML = ""; // 先清空舊圖
+    if (row.attachments && Array.isArray(row.attachments)) {
+      row.attachments.forEach(att => {
+        if (att.type === 'image') {
+          const img = document.createElement("img");
+          img.className = "modal-img";
+          // 使用 Supabase Transform 優化載入，但保持高畫質 (width=800)
+          img.src = `${att.url}?width=800`; 
+          modalImages.appendChild(img);
+        }
+      });
+    }
+
+    rawModal.classList.add("open");
+  }
+
+  function closeRawModal() {
+    rawModal.classList.remove("open");
+  }
+
+  modalClose.addEventListener("click", closeRawModal);
+  rawModal.addEventListener("click", (e) => {
+    if (e.target === rawModal || e.target.classList.contains("modal-backdrop")) {
+      closeRawModal();
+    }
+  });
+
+  /* ========= Sidebar 標籤 ========= */
+
+  function buildSidebarTags(rows) {
+    const tagCounts = new Map();
+
+    rows.forEach((row) => {
+      const tags = Array.isArray(row.tags) ? row.tags : [];
+      tags.forEach((t) => {
+        tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+      });
+    });
+
+    sidebarTagsEl.innerHTML = "";
+
+    const allBtn = document.createElement("button");
+    allBtn.className = "sidebar-tag";
+    allBtn.textContent = "全部";
+    if (!activeTag && !currentQuery) {
+      allBtn.classList.add("active");
+    }
+    allBtn.addEventListener("click", () => {
+      activeTag = "";
+      currentQuery = "";
+      searchInput.value = "";
+      loadNotes("", "");
+    });
+    sidebarTagsEl.appendChild(allBtn);
+
+    const sortedTags = Array.from(tagCounts.entries()).sort(
+      ([tagA, countA], [tagB, countB]) => {
+        if (countA !== countB) return countB - countA;
+        return tagA.localeCompare(tagB, "zh-Hant");
+      }
+    );
+
+    sortedTags.forEach(([tag]) => {
+      const btn = document.createElement("button");
+      btn.className = "sidebar-tag";
+      btn.textContent = tag;
+      if (activeTag === tag) {
+        btn.classList.add("active");
+      }
+
+      btn.addEventListener("click", () => {
+        if (activeTag === tag) {
+          activeTag = "";
+          currentQuery = "";
+          searchInput.value = "";
+          loadNotes("", "");
+        } else {
+          activeTag = tag;
+          currentQuery = "";
+          searchInput.value = tag;
+          loadNotes("", tag);
+        }
+      });
+
+      sidebarTagsEl.appendChild(btn);
+    });
+  }
+
+  /* ========= 主資料載入：支援 q + tag + attachments ========= */
+
+  async function loadNotes(q = "", tag = "") {
+    currentQuery = q;
+
+    searchBtn.disabled = true;
+    searchBtn.innerHTML = '<span class="spinner"></span>';
+    statusEl.textContent = q || tag ? "搜尋中..." : "載入中...";
+    statusEl.style.display = "block";
+    cardsEl.innerHTML = "";
+
+    const params = new URLSearchParams();
+    if (q)   params.set("q", q);
+    if (tag) params.set("tag", tag);
+
+    const url = params.toString()
+      ? `/api/notes?${params.toString()}`
+      : "/api/notes";
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        statusEl.textContent = "❌ 讀取失敗";
+        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+        searchBtn.disabled = false;
+        return;
+      }
+
+      const json = await res.json();
+      const data = json.data || [];
+
+      buildSidebarTags(data);
+
+      if (!data.length) {
+        statusEl.textContent = (q || tag) ? "🔍 無符合結果" : "📭 暫無記錄";
+        cardsEl.innerHTML =
+          '<div class="empty">試著新增一些對話記錄吧！</div>';
+        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+        searchBtn.disabled = false;
+        return;
+      }
+
+      statusEl.textContent = `共 ${data.length} 筆`;
+      cardsEl.innerHTML = "";
+
+      data.forEach((row, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.animationDelay = `${index * 0.05}s`;
+
+        card.addEventListener("click", (e) => {
+          if (e.target.closest(".card-tags span")) return;
+          openRawModal(row);
+        });
+
+        // === 新增：卡片封面圖 ===
+        if (row.attachments && Array.isArray(row.attachments) && row.attachments.length > 0) {
+          const firstImg = row.attachments.find(a => a.type === 'image');
+          if (firstImg) {
+            const imgEl = document.createElement("img");
+            imgEl.className = "card-img";
+            // 使用縮圖優化列表效能
+            imgEl.src = `${firstImg.url}?width=400`; 
+            imgEl.loading = "lazy";
+            card.appendChild(imgEl);
+          }
+        }
+
+        // 標題
+        const title = document.createElement("div");
+        title.className = "card-title";
+        title.textContent = row.title || "📝 無標題記錄";
+
+        // 摘要
+        const summary = document.createElement("div");
+        summary.className = "card-summary";
+        summary.textContent = row.summary || "暫無摘要內容";
+
+        // Tags
+        const tagsDiv = document.createElement("div");
+        tagsDiv.className = "card-tags";
+        const tags = Array.isArray(row.tags) ? row.tags : [];
+
+        tags.forEach((t) => {
+          const span = document.createElement("span");
+          const isSystem = SYSTEM_TAGS.includes(t);
+          span.style.background = isSystem
+            ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)"
+            : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
+          span.style.color = isSystem ? "#5b21b6" : "#374151";
+          span.textContent = `#${t}`;
+
+          span.addEventListener("click", (e) => {
+            e.stopPropagation(); 
+            if (activeTag === t) {
+              activeTag = "";
+              currentQuery = "";
+              searchInput.value = "";
+              loadNotes("", "");
+            } else {
+              activeTag = t;
+              currentQuery = "";
+              searchInput.value = t;
+              loadNotes("", t);
+            }
+          });
+
+          tagsDiv.appendChild(span);
+        });
+
+        // meta
+        const meta = document.createElement("div");
+        meta.className = "card-meta";
+        const created = row.created_at
+          ? new Date(row.created_at).toLocaleString("zh-TW", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "";
+        meta.innerHTML = `<span class="meta-item">🕐 ${created}</span>`;
+
+        // 原文預覽
+        const raw = document.createElement("div");
+        raw.className = "card-raw";
+        raw.textContent = row.raw_text || "無原始內容";
+
+        card.appendChild(title);
+        card.appendChild(summary);
+        if (tagsDiv.childNodes.length) card.appendChild(tagsDiv);
+        card.appendChild(meta);
+        card.appendChild(raw);
+
+        cardsEl.appendChild(card);
+      });
+    } catch (error) {
+      console.error(error);
+      statusEl.textContent = "❌ 載入錯誤";
+      cardsEl.innerHTML =
+        '<div class="empty">發生錯誤，請檢查網路連線</div>';
+    }
+
+    searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+    searchBtn.disabled = false;
+  }
+
+  // Init
+  loadNotes("", "");
+
+  // Events
+  searchBtn.addEventListener("click", () => {
+    activeTag = "";
+    const q = searchInput.value.trim();
+    loadNotes(q, "");
+  });
+
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      activeTag = "";
+      const q = searchInput.value.trim();
+      loadNotes(q, "");
+    }
+  });
+</script>
+</body>
+</html>
