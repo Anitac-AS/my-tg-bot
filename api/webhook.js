@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 
 // ====== Gemini 設定 ======
-const MODEL_NAME = "gemini-2.0-flash";
+const MODEL_NAME = "gemini-3.5-flash";
 
 const SYSTEM_PROMPT = `
 你是一位資料歸檔專家。請分析以下內容，產生一個 JSON 物件，包含：
