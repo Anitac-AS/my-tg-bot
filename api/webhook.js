@@ -1,9 +1,9 @@
 // 檔案：api/webhook.js
-import { GoogleGenerativeAI } from "@google/generative-ai";
+
 import { createClient } from "@supabase/supabase-js";
 
-// ====== Gemini 設定 ======
-const MODEL_NAME = "gemini-2.0-flash";
+// ====== Gemma 設定 ======
+const MODEL_NAME = "gemma-4";
 
 const SYSTEM_PROMPT = `
 你是一位資料歸檔專家。請分析以下內容，產生一個 JSON 物件，包含：
@@ -22,8 +22,6 @@ const SYSTEM_PROMPT = `
 3. 標籤盡量使用單詞或短片語，避免出現完整句子。
 請只輸出「純 JSON」，不要有 Markdown、說明文字或 \`\`\` 區塊。
 `;
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // ====== Supabase 設定 ======
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -65,15 +63,14 @@ async function replyToTelegram({ chatId, text }) {
   }
 }
 
-// ====== Helper: 處理圖片上傳 (新增功能) ======
+// ====== Helper: 處理圖片上傳 ======
 async function handlePhotoUpload(fileId) {
   try {
     const token = process.env.BOT_TOKEN;
-    
-    // 1. 取得檔案路徑 (getFile)
+
     const fileInfoRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`);
     const fileInfo = await fileInfoRes.json();
-    
+
     if (!fileInfo.ok || !fileInfo.result.file_path) {
       throw new Error("Cannot get file path from Telegram");
     }
@@ -81,18 +78,15 @@ async function handlePhotoUpload(fileId) {
     const filePath = fileInfo.result.file_path;
     const downloadUrl = `https://api.telegram.org/file/bot${token}/${filePath}`;
 
-    // 2. 下載檔案
     const imgRes = await fetch(downloadUrl);
     const arrayBuffer = await imgRes.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // 3. 上傳到 Supabase Storage
-    // 檔名加上 timestamp 避免重複： photos/1709234123_abcde.jpg
-    const ext = filePath.split('.').pop(); // 取得副檔名 (jpg/png)
+    const ext = filePath.split('.').pop();
     const fileName = `photos/${Date.now()}_${fileId}.${ext}`;
 
     const { data, error } = await supabase.storage
-      .from('assets') // 請確認 Bucket 名稱是 'assets'
+      .from('assets')
       .upload(fileName, buffer, {
         contentType: `image/${ext}`,
         upsert: false
@@ -100,7 +94,6 @@ async function handlePhotoUpload(fileId) {
 
     if (error) throw error;
 
-    // 4. 取得公開網址
     const { data: publicData } = supabase.storage
       .from('assets')
       .getPublicUrl(fileName);
@@ -109,10 +102,9 @@ async function handlePhotoUpload(fileId) {
 
   } catch (err) {
     console.error("Image upload failed:", err);
-    return null; // 上傳失敗回傳 null，但不中斷流程
+    return null;
   }
 }
-
 
 // ====== Webhook 主處理器 ======
 export default async function handler(req, res) {
@@ -127,23 +119,17 @@ export default async function handler(req, res) {
 
     chatId = msg.chat.id;
 
-    // === 修改點 1: 判斷輸入來源 (純文字 或 圖片+圖說) ===
     let messageText = "";
-    let attachments = []; // 準備存入 DB 的附件欄位
+    let attachments = [];
 
-    // 情境 A: 純文字
     if (msg.text) {
       messageText = msg.text;
-    } 
-    // 情境 B: 圖片 (Photo)
-    else if (msg.photo) {
-      // 圖片通常是一個 array，最後一張解析度最高
+    } else if (msg.photo) {
       const bestPhoto = msg.photo[msg.photo.length - 1];
-      
-      // 嘗試上傳圖片
+
       console.log("Processing photo...");
       const publicUrl = await handlePhotoUpload(bestPhoto.file_id);
-      
+
       if (publicUrl) {
         attachments.push({
           type: "image",
@@ -153,14 +139,11 @@ export default async function handler(req, res) {
         });
       }
 
-      // 取得圖說 (Caption) 作為 AI 分析的文字
-      messageText = msg.caption || ""; 
+      messageText = msg.caption || "";
     }
 
-    // 若完全沒有文字 (純圖無圖說 或 不支援的格式)
     if (!messageText.trim()) {
       if (attachments.length > 0) {
-        // 有圖但沒字 -> 還是存進去，但 title/summary 可能需要預設值
         messageText = "(這張圖片沒有附帶說明)";
       } else {
         await replyToTelegram({ chatId, text: "我需要文字或帶有文字說明的圖片喔！" });
@@ -170,22 +153,27 @@ export default async function handler(req, res) {
 
     // ====== AI 分析 ======
     console.log("Analyze:", messageText);
-    const model = genAI.getGenerativeModel({
-      model: MODEL_NAME,
-      systemInstruction: SYSTEM_PROMPT,
-      generationConfig: { responseMimeType: "application/json" },
+    const aiRes = await fetch(`${process.env.BASE_URL}/v1/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: MODEL_NAME,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: messageText },
+        ],
+      }),
     });
-
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: messageText }] }],
-    });
+    const aiJson = await aiRes.json();
 
     let parsed;
     try {
-      parsed = JSON.parse(result.response.text());
+      parsed = JSON.parse(aiJson.choices[0].message.content);
     } catch (e) {
       console.error("AI JSON Parse Error");
-      // 若 JSON 解析失敗，還是將資料存入，避免丟失
       parsed = { title: "AI 解析失敗", summary: messageText, tags: [] };
     }
 
@@ -199,8 +187,8 @@ export default async function handler(req, res) {
           title: parsed.title,
           summary: parsed.summary,
           tags: parsed.tags,
-          raw_text: messageText,      // 存入的文字 (若是圖片則是 caption)
-          attachments: attachments,   // === 修改點 2: 存入 attachments JSONB ===
+          raw_text: messageText,
+          attachments: attachments,
           created_at: new Date().toISOString(),
         });
 
@@ -208,9 +196,8 @@ export default async function handler(req, res) {
     }
 
     // ====== 回覆 Telegram ======
-    // 若有圖片，可以在回覆中加個標記 ✅
     const hasImg = attachments.length > 0 ? " [包含圖片]" : "";
-    
+
     const pretty = [
       `🧠 <b>AI 歸檔完成${hasImg}</b>`,
       `\n<b>標題</b>：${parsed.title ?? ""}`,
