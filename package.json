@@ -7,9 +7,10 @@
   "scripts": {
     "start": "node api/webhook.js"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "2.48.0"
-  },
+"dependencies": {
+  "@google/generative-ai": "0.21.0",
+  "@supabase/supabase-js": "2.48.0"
+}
 "engines": {
   "node": "24.x"
 }
