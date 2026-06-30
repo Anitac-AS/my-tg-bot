@@ -207,7 +207,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error("Handler Error:", error);
-    if (chatId) await replyToTelegram({ chatId, text: "系統發生錯誤，請查尋原因。" });
+    if (chatId) await replyToTelegram({ chatId, text: "系統發生錯誤，請找找原因。" });
     return res.status(200).send("OK");
   }
 }
