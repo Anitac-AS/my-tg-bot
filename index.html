@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#FFF6E5" />
   <link rel="icon" href="/favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Chiron+GoRound+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
@@ -24,8 +25,8 @@
       --pink: #FFD6E0;
       --coral: #FF8A65;
       --white: #FFFFFF;
-      --font: 'Chiron GoRound TC', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
-      --font-latin: 'Mitr', 'Chiron GoRound TC', sans-serif;
+      --font: 'Chiron GoRound TC', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+      --font-latin: 'Mitr', 'Chiron GoRound TC', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
       --bounce: cubic-bezier(.3, 1.4, .5, 1);
     }
 
@@ -270,6 +271,22 @@
     .panel-actions .push { margin-left: auto; }
     .pill.danger:hover, .pill.danger.confirm { background: #B91C1C; border-color: #B91C1C; color: var(--white); }
 
+    .tm-tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .tm-hint { margin: 0; font-size: 13px; line-height: 1.6; color: var(--muted); }
+    .tm-list { display: flex; flex-direction: column; gap: 8px; }
+    .tm-row {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      background: var(--cream); border-radius: 18px; padding: 8px 10px;
+    }
+    .tm-name { display: inline-flex; align-items: center; gap: 6px; border-radius: 12px; padding: 4px 10px; font-weight: 800; font-size: 14px; }
+    .tm-name .cnt { font-family: var(--font-latin); font-weight: 500; font-size: 12px; background: var(--white); border-radius: 999px; padding: 0 7px; }
+    .tm-row form { display: flex; gap: 6px; flex: 1; min-width: 200px; margin-left: auto; }
+    .tm-row input {
+      flex: 1; min-width: 0; font-size: 14px; padding: 8px 12px; border-radius: 999px;
+      border: 2px solid var(--line); background: var(--white); outline: none;
+    }
+    .tm-row input:focus { border-color: var(--ink); }
+    .tm-row .pill { min-height: 38px; padding: 6px 12px; font-size: 13px; }
     .edit-form { display: flex; flex-direction: column; gap: 12px; }
     .edit-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; }
     .edit-form .hint { font-weight: 500; color: var(--muted); }
@@ -681,6 +698,7 @@
         onclick: () => { tagsExpanded = !showAll; renderTagNav(); },
       }));
     }
+    tagNavEl.append(el("button", { class: "more-btn", type: "button", text: "整理標籤", onclick: openTagManager }));
   }
 
   /* ========= 卡片 ========= */
@@ -1082,6 +1100,94 @@
   function reloadKeepPanel() {
     state.items = []; state.total = 0;
     loadPage();
+  }
+
+  /* ========= 整理標籤 ========= */
+  let tmFilter = "all";
+
+  function openTagManager() {
+    if (panelAnimating) return;
+    currentRow = null;
+    renderTagManager();
+    overlayEl.hidden = false;
+    document.body.style.overflow = "hidden";
+    if (!reduceMotion) {
+      backdropEl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
+      panelEl.animate([{ opacity: 0, transform: "translateY(20px) scale(.97)" }, { opacity: 1, transform: "none" }],
+        { duration: 320, easing: "cubic-bezier(.3, 1.3, .5, 1)" });
+    }
+    $("panelClose").focus({ preventScroll: true });
+  }
+
+  async function tagAction(fn, okText) {
+    try {
+      const r = await fn();
+      toast(`${okText}（影響 ${r.changed ?? 0} 則筆記）`, 2400);
+      await loadTags();
+      renderTagManager();
+      state.items = []; state.total = 0;
+      writeUrl(false); renderFilters();
+      loadPage();
+    } catch (e) { toast(e.message, 3000); renderTagManager(); }
+  }
+
+  function renderTagManager() {
+    panelBody.innerHTML = "";
+    const list = tmFilter === "rare" ? tagCounts.filter(t => t.count <= 1) : tagCounts;
+    const rareCount = tagCounts.filter(t => t.count <= 1).length;
+
+    const dl = el("datalist", { id: "tmTagList" }, tagCounts.map(t => el("option", { value: t.tag })));
+
+    const filterBtn = (key, label) => {
+      const b = el("button", { class: "type-btn" + (tmFilter === key ? " active" : ""), type: "button", text: label,
+        "aria-pressed": tmFilter === key, onclick: () => { tmFilter = key; renderTagManager(); } });
+      return b;
+    };
+
+    const rows = list.map(({ tag, count }) => {
+      const name = el("span", { class: "tm-name" }, [tag, el("span", { class: "cnt", text: count })]);
+      name.style.background = tagColor(tag);
+
+      const input = el("input", { type: "text", list: "tmTagList", placeholder: "改名，或輸入既有標籤來合併", "aria-label": `${tag} 改名或合併為` });
+      const apply = el("button", { class: "pill pill-ink", type: "submit", text: "套用" });
+      const form = el("form", {}, [input, apply]);
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const to = input.value.trim().replace(/^#/, "");
+        if (!to || to === tag) return;
+        const merging = tagCounts.some(t => t.tag === to);
+        apply.disabled = true;
+        state.tags = state.tags.map(t => (t === tag ? to : t)).filter((t, i, a) => a.indexOf(t) === i);
+        tagAction(() => api("/api/tags", { method: "PATCH", body: JSON.stringify({ from: tag, to }) }),
+          merging ? `已把「${tag}」合併到「${to}」` : `已改名為「${to}」`);
+      });
+
+      const del = el("button", { class: "pill pill-white danger", type: "button", text: "刪除" });
+      let timer;
+      del.addEventListener("click", () => {
+        if (!del.classList.contains("confirm")) {
+          del.classList.add("confirm"); del.textContent = "確定？";
+          timer = setTimeout(() => { del.classList.remove("confirm"); del.textContent = "刪除"; }, 3000);
+          return;
+        }
+        clearTimeout(timer); del.disabled = true;
+        state.tags = state.tags.filter(t => t !== tag);
+        tagAction(() => api(`/api/tags?tag=${encodeURIComponent(tag)}`, { method: "DELETE" }), `已刪除「${tag}」`);
+      });
+
+      return el("div", { class: "tm-row" }, [name, form, del]);
+    });
+
+    panelBody.append(el("div", { class: "panel-main" }, [
+      el("div", { class: "panel-head" }, [el("div", {}, [
+        el("h2", { class: "panel-title", id: "panelTitle", text: "整理標籤" }),
+        el("span", { class: "panel-date", text: `共 ${tagCounts.length} 個標籤` }),
+      ])]),
+      el("p", { class: "tm-hint", text: "改名：輸入新名稱。合併：輸入一個已經存在的標籤，兩者會併成一個。刪除：只會把標籤從筆記上拿掉，筆記本身不會被刪。" }),
+      el("div", { class: "tm-tools" }, [filterBtn("all", "全部"), filterBtn("rare", `只用過 1 次（${rareCount}）`)]),
+      dl,
+      el("div", { class: "tm-list" }, rows.length ? rows : [el("p", { class: "tm-hint", text: "沒有符合的標籤。" })]),
+    ]));
   }
 
   /* ========= 啟動 ========= */
