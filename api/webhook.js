@@ -5,23 +5,51 @@ import { createClient } from "@supabase/supabase-js";
 // ====== Gemini 設定 ======
 const MODEL_NAME = "gemini-2.5-flash";
 
-const SYSTEM_PROMPT = `
+const CORE_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
+
+// 依照資料庫現有標籤組出提示，讓 AI 優先沿用，避免標籤越長越多
+function buildSystemPrompt(existingTags) {
+  const extra = existingTags.filter(t => !CORE_TAGS.includes(t));
+  return `
 你是一位資料歸檔專家。請分析以下內容，產生一個 JSON 物件，包含：
 
 {
   "title": "一句簡短吸引人的標題",
   "summary": "一段不超過 100 字的摘要",
-  "tags": ["標籤1","標籤2","標籤3","標籤4","標籤5"]
+  "tags": ["標籤1","標籤2","標籤3"]
 }
-重要規則：
-1. 標籤請優先從以下固定列表中選 1~5 個最相關者：
-   ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"]
-
-2. 若內容真的無法匹配上述分類，才允許新增新的標籤，但請控制在 1~2 個。
-
-3. 標籤盡量使用單詞或短片語，避免出現完整句子。
+標籤規則（非常重要，請嚴格遵守）：
+1. 總共給 1~4 個標籤，寧缺勿濫。
+2. 第一優先：從核心分類選 1~3 個：${JSON.stringify(CORE_TAGS)}
+3. 第二優先：知識庫已經在用的其他標籤：${JSON.stringify(extra)}
+   只要意思相近就沿用，不要另造同義詞（例如已有「食譜」就不要新增「料理」「美食」）。
+4. 只有在以上都完全不適用時，才可新增 1 個新標籤；新標籤必須是 2~4 個字的通用名詞，不可以是專有名詞、人名、品牌或句子。
 請只輸出「純 JSON」，不要有 Markdown、說明文字或 \`\`\` 區塊。
 `;
+}
+
+// 取得常用標籤（最多 40 個）；失敗時退回只用核心分類
+async function getExistingTags() {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase.rpc("mm_tag_counts");
+    if (error) throw error;
+    return (data || []).filter(r => Number(r.cnt) >= 2).slice(0, 40).map(r => r.tag);
+  } catch (e) {
+    console.error("Load tags failed:", e);
+    return [];
+  }
+}
+
+function normalizeTags(tags) {
+  const out = [];
+  for (const t of Array.isArray(tags) ? tags : []) {
+    if (typeof t !== "string") continue;
+    const v = t.trim().replace(/^#/, "").slice(0, 30);
+    if (v && !out.includes(v)) out.push(v);
+  }
+  return out.slice(0, 4);
+}
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -170,7 +198,7 @@ export default async function handler(req, res) {
     console.log("Analyze:", messageText);
     const model = genAI.getGenerativeModel({
       model: MODEL_NAME,
-      systemInstruction: SYSTEM_PROMPT,
+      systemInstruction: buildSystemPrompt(await getExistingTags()),
       generationConfig: { responseMimeType: "application/json" },
     });
 
@@ -181,6 +209,7 @@ export default async function handler(req, res) {
     let parsed;
     try {
       parsed = JSON.parse(result.response.text());
+      parsed.tags = normalizeTags(parsed.tags);
     } catch (e) {
       console.error("AI JSON Parse Error");
       parsed = { title: "AI 解析失敗", summary: messageText, tags: [] };
