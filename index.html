@@ -4,690 +4,410 @@
   <meta charset="UTF-8" />
   <title>Shu's MyMind</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#FFF6E5" />
   <link rel="icon" href="/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Chiron+GoRound+TC:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <style>
+    :root {
+      --cream: #FFF6E5;
+      --ink: #1E3A2F;
+      --ink-2: #3F5A4E;
+      --muted: #4D6B5E;
+      --line: #D9D2C3;
+      --mint: #BDEBD3;
+      --mint-soft: #E8F7EF;
+      --peach: #FFC8A6;
+      --butter: #FFE27A;
+      --sky: #BFE0FF;
+      --pink: #FFD6E0;
+      --coral: #FF8A65;
+      --white: #FFFFFF;
+      --font: 'Chiron GoRound TC', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-latin: 'Mitr', 'Chiron GoRound TC', sans-serif;
+      --bounce: cubic-bezier(.3, 1.4, .5, 1);
+    }
+
     * { box-sizing: border-box; }
-
+    html { -webkit-text-size-adjust: 100%; }
     body {
-      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", 
-                   'Noto Sans TC', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       margin: 0;
-      padding: 0;
       min-height: 100vh;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: var(--font);
+      overflow-x: hidden;
+    }
+    button, input, textarea { font: inherit; color: inherit; }
+    a { color: var(--ink); }
+    a:hover { color: #C2410C; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+    /* 背景圓 */
+    .blob { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
+    .blob-a { width: 420px; height: 420px; background: var(--butter); top: -180px; right: -120px; }
+    .blob-b { width: 260px; height: 260px; background: var(--mint); top: 140px; left: -140px; }
+
+    .wrap {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 0 auto;
+      padding: 44px 32px 80px;
+      display: flex; flex-direction: column; gap: 28px;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 32px 20px;
+    /* ===== Header ===== */
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+    .home { display: flex; align-items: center; gap: 14px; text-decoration: none; color: var(--ink); }
+    .home:hover { color: var(--ink); }
+    .home-mark {
+      width: 58px; height: 58px; border-radius: 18px; flex-shrink: 0;
+      background: var(--coral); border: 2px solid var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .4s var(--bounce);
     }
+    .home:hover .home-mark { transform: rotate(90deg); }
+    .home-text { display: flex; flex-direction: column; }
+    .home-title { font-family: var(--font-latin); font-weight: 600; font-size: 44px; line-height: 1; }
+    .home-sub { font-size: 15px; font-weight: 500; margin-top: 4px; }
+    .top-actions { display: flex; gap: 10px; align-items: center; }
 
-    /* Header */
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
-      animation: fadeInDown 0.6s ease;
+    .pill {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      min-height: 44px; padding: 8px 18px;
+      border: 2px solid var(--ink); border-radius: 999px;
+      background: transparent; color: var(--ink);
+      font-weight: 700; font-size: 14px; cursor: pointer;
+      transition: transform .15s ease, background .15s ease;
     }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: 36px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: -0.5px;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .subtitle {
-      font-size: 16px;
-      color: rgba(255,255,255,0.9);
-      font-weight: 400;
-    }
-
-    /* Search Bar */
-    .search-wrapper {
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      animation: fadeInUp 0.6s ease;
-    }
-
-    .search-bar { display: flex; gap: 12px; }
-
-    .search-input-wrapper { flex: 1; position: relative; }
-
-    .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .search-bar input {
-      width: 100%;
-      padding: 14px 20px 14px 48px;
-      border-radius: 12px;
-      border: 2px solid #e5e7eb;
-      font-size: 15px;
-      transition: all 0.3s ease;
-      background: #fff;
-    }
-
-    .search-bar input:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    }
-
-    .search-bar button {
-      padding: 14px 28px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    .pill:hover { transform: scale(1.05); }
+    .pill:disabled { opacity: .6; cursor: default; transform: none; }
+    .pill-ink { background: var(--ink); color: var(--cream); }
+    .pill-coral { background: var(--coral); color: var(--ink); }
+    .pill-white { background: var(--white); }
+    .count-pill {
+      font-weight: 700; font-size: 14px; background: var(--white);
+      border: 2px solid var(--ink); border-radius: 999px; padding: 8px 14px;
       white-space: nowrap;
     }
+    .count-pill:empty { display: none; }
 
-    .search-bar button:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    /* ===== Search ===== */
+    .search-box {
+      background: var(--white); border: 2px solid var(--ink); border-radius: 32px;
+      padding: 18px; display: flex; flex-direction: column; gap: 14px;
     }
-    
-    .search-bar button:active:not(:disabled) { transform: translateY(0); }
-    .search-bar button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
+    .search-row { display: flex; gap: 10px; align-items: center; }
+    .search-field {
+      flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px;
+      background: var(--cream); border-radius: 999px; padding: 0 18px;
+      border: 2px solid transparent; transition: border-color .15s;
     }
+    .search-field:focus-within { border-color: var(--ink); }
+    .search-field input {
+      flex: 1; min-width: 0; border: none; background: transparent; outline: none;
+      padding: 15px 0; font-size: 16px; font-weight: 500;
+    }
+    .search-field input::placeholder { color: var(--muted); }
+    .search-row .pill { min-height: 54px; padding: 0 28px; font-size: 16px; font-weight: 800; }
 
-    /* Layout */
-    .layout {
-      display: grid;
-      grid-template-columns: 240px minmax(0, 1fr);
-      gap: 20px;
-      align-items: flex-start;
-      width: 100%;
-      max-width: 100%;
-      overflow: hidden;
-    }
-
-    /* Sidebar Optimized */
-    .sidebar {
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 16px 18px;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.08);
-      animation: fadeIn 0.6s ease;
-    }
-
-    .sidebar-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #4b5563;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sidebar-tags {
-      display: flex;
-      flex-direction: column; /* 改為垂直排列容器，方便做收折區塊 */
-      gap: 8px;
-    }
-
-    .tags-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    /* 隱藏區塊預設樣式 */
-    .tags-hidden-area {
-      display: none; /* 預設隱藏 */
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-      padding-top: 8px;
-      border-top: 1px solid #e5e7eb;
-    }
-    
-    .tags-hidden-area.show {
-      display: flex; /* 展開時顯示 */
-    }
-
-    .sidebar-tag {
-      border: none;
-      border-radius: 999px;
-      padding: 6px 12px;
-      font-size: 12px;
-      cursor: pointer;
-      background: #f3f4f6;
-      color: #374151;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .sidebar-tag:hover { background: #e5e7eb; }
-
-    .sidebar-tag.active {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      box-shadow: 0 3px 10px rgba(79,70,229,0.4);
-    }
-
-    /* 展開/收合按鈕 */
-    .sidebar-toggle-btn {
-      background: none;
-      border: none;
-      color: #667eea;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 4px 0;
-      text-align: left;
-      margin-top: 4px;
-    }
-    .sidebar-toggle-btn:hover { text-decoration: underline; }
-
-    .main { min-width: 0; width: 100%; overflow: hidden; }
-
-    .empty {
-      text-align: center;
-      font-size: 15px;
-      color: rgba(255,255,255,0.8);
-      margin-top: 60px;
-      animation: fadeIn 0.6s ease;
-    }
-
-    /* Cards */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 20px;
-      animation: fadeIn 0.8s ease;
-      padding-bottom: 80px;
-      width: 100%; 
-    }
-
-    .card {
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(255,255,255,0.3);
-      animation: cardFadeIn 0.5s ease backwards;
-      cursor: pointer;
-      max-width: 100%;
-      overflow: hidden;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-    }
-
-    .card-img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 4px;
-      background-color: #f3f4f6;
-      border: 1px solid rgba(0,0,0,0.05);
-      display: block;
-    }
-
-    .card-title {
-      font-weight: 700;
-      font-size: 18px;
-      color: #1f2937;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .card-summary {
-      font-size: 14px;
-      color: #4b5563;
-      line-height: 1.6;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-
-    .card-tags span {
-      display: inline-flex;
-      align-items: center;
-      background: linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%);
-      color: #5b21b6;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      cursor: pointer;
-    }
-
-    .card-tags span:hover {
-      transform: scale(1.05);
-      background: linear-gradient(135deg, #c7d2fe 0%, #ddd6fe 100%);
-    }
-
-    .card-meta {
-      font-size: 12px;
-      color: #9ca3af;
-      padding-top: 8px;
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .card-raw {
-      font-size: 13px;
-      color: #6b7280;
-      white-space: pre-wrap;
-      background: #f9fafb;
-      border-radius: 8px;
-      padding: 12px;
-      margin-top: 4px;
-      border-left: 3px solid #667eea;
-      max-height: 120px;
-      overflow-y: auto;
-      line-height: 1.5;
-    }
-    
-    .card-raw::-webkit-scrollbar { width: 6px; }
-    .card-raw::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-    .card-raw::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    .card-raw::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-    /* Status Bar */
-    .status-bar {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      z-index: 1000;
-    }
-
-    #status {
-      font-size: 13px;
-      color: rgba(255,255,255,0.95);
-      font-weight: 500;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(10px);
-      padding: 10px 16px;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transition: all 0.3s ease;
-    }
-    #status:hover { background: rgba(0,0,0,0.7); }
-
-    /* Modal */
-    .modal {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-    .modal.open { display: flex; }
-
-    .modal-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(15,23,42,0.55);
-      backdrop-filter: blur(6px);
-    }
-
-    .modal-content {
-      position: relative;
-      background: #f9fafb;
-      border-radius: 16px;
-      padding: 20px 24px;
-      max-width: 720px;
-      width: calc(100% - 40px);
-      max-height: 85vh;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      animation: fadeInUp 0.3s ease;
-    }
-
-    .modal-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-right: 32px; /* 避開關閉按鈕 */
-    }
-
-    .modal-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #111827;
-      word-wrap: break-word;
-    }
-
-    .modal-time {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 4px;
-    }
-
-    .modal-img-wrapper {
-      margin-top: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-      max-height: 35vh;
-      padding-right: 4px;
-      flex-shrink: 0;
-    }
-
-    .modal-img {
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    /* 複製按鈕區塊 */
-    .raw-tools {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 8px;
-      margin-bottom: 4px;
-    }
-    
-    .copy-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #4b5563;
-      background: #fff;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .copy-btn:hover { background: #f3f4f6; color: #111827; border-color: #9ca3af; }
-    .copy-btn:active { transform: translateY(1px); }
-    .copy-btn.copied {
-      background: #10b981;
-      color: white;
-      border-color: #059669;
-    }
-
-    .modal-raw {
-      font-size: 14px;
-      color: #111827;
-      white-space: pre-wrap;
-      line-height: 1.6;
-      padding: 12px;
-      border-radius: 8px;
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      overflow-y: auto;
-      flex: 1; /* 佔滿剩餘高度 */
-    }
-
-    .modal-raw::-webkit-scrollbar, .modal-img-wrapper::-webkit-scrollbar { width: 8px; }
-    .modal-raw::-webkit-scrollbar-thumb, .modal-img-wrapper::-webkit-scrollbar-thumb {
-      background: #cbd5e1; border-radius: 4px;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 10px;
-      right: 12px;
-      border: none;
-      background: transparent;
-      font-size: 20px;
-      cursor: pointer;
-      color: #6b7280;
-    }
-    .modal-close:hover { color: #111827; }
-
-    /* Animations */
-    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes cardFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .container { padding: 20px 16px; }
-      h1 { font-size: 28px; }
-      .search-wrapper { padding: 20px; }
-      .search-bar { flex-direction: column; }
-      .search-bar button { width: 100%; padding: 14px 20px; }
-      .layout { display: flex; flex-direction: column; gap: 16px; }
-      .sidebar { width: 100%; padding: 14px 16px; }
-      .sidebar-tags { flex-direction: column; gap: 8px; }
-      .search-icon { display: none; }
-      .search-bar input { padding: 14px 20px; }
-      .cards { grid-template-columns: 1fr; padding-bottom: 100px; width: 100%; }
-      .card { width: 100%; max-width: 100%; padding: 16px; }
-      .modal-content { width: calc(100vw - 32px); max-width: calc(100vw - 32px); max-height: 85vh; margin: 0 16px; }
-    }
-    @media (max-width: 480px) {
-      .container { padding: 16px 12px; }
-      h1 { font-size: 24px; }
-      .modal-content { width: calc(100vw - 24px); max-width: calc(100vw - 24px); margin: 0 12px; padding: 16px; }
-    }    
-
-    /* ===== Phase 1 additions ===== */
-    .header { position: relative; }
-    .header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 8px; }
-    .ghost-btn {
-      border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.12);
-      color: #fff; font-size: 13px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
-      transition: background 0.2s;
-    }
-    .ghost-btn:hover { background: rgba(255,255,255,0.25); }
-
-    /* Filter row */
-    .filter-row {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
-      margin-top: 14px;
-    }
-    .type-group { display: inline-flex; background: #f3f4f6; border-radius: 10px; padding: 3px; gap: 2px; }
+    .filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .type-group { display: flex; gap: 8px; flex-wrap: wrap; }
     .type-btn {
-      border: none; background: transparent; padding: 6px 12px; font-size: 13px;
-      border-radius: 8px; cursor: pointer; color: #4b5563; transition: all 0.2s;
+      min-height: 40px; padding: 8px 16px; border-radius: 999px;
+      border: 2px solid var(--line); background: var(--white); color: var(--ink);
+      font-weight: 700; font-size: 14px; cursor: pointer;
+      transition: transform .15s ease;
     }
-    .type-btn.active { background: #fff; color: #5b21b6; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-    .active-filters { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .type-btn:hover { transform: scale(1.05); }
+    .type-btn.active { background: var(--mint); border-color: var(--ink); }
+    .active-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .filter-chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;
-      border: none; border-radius: 999px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; min-height: 36px;
+      padding: 6px 12px; border-radius: 999px; border: none;
+      background: var(--ink); color: var(--cream); font-weight: 700; font-size: 13px; cursor: pointer;
     }
-    .filter-chip .x { opacity: 0.8; font-size: 14px; line-height: 1; }
-    .filter-chip:hover .x { opacity: 1; }
-    .clear-btn { background: none; border: none; color: #667eea; font-size: 12px; font-weight: 600; cursor: pointer; }
-    .clear-btn:hover { text-decoration: underline; }
-    .result-info { margin-left: auto; font-size: 12px; color: #6b7280; }
+    .filter-chip svg { opacity: .8; }
+    .filter-chip:hover svg { opacity: 1; }
+    .clear-btn {
+      background: none; border: none; color: var(--ink); font-weight: 700; font-size: 13px;
+      text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 8px 4px;
+    }
 
-    /* Sidebar tag count */
-    .sidebar-tag .cnt { opacity: 0.6; margin-left: 4px; font-size: 11px; }
-    .sidebar-tag.active .cnt { opacity: 0.85; }
+    /* ===== Tag stickers ===== */
+    .tag-nav { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; padding: 0 4px; }
+    .sticker {
+      display: inline-flex; align-items: center; gap: 6px; min-height: 40px;
+      padding: 8px 14px; border: 2px solid var(--ink); border-radius: 14px;
+      font-weight: 800; font-size: 14px; cursor: pointer; color: var(--ink);
+      transform: rotate(var(--rot, 0deg));
+      transition: transform .15s ease;
+    }
+    .sticker:hover { transform: rotate(0deg) scale(1.08); }
+    .sticker.active { background: var(--ink) !important; color: var(--cream); }
+    .sticker .cnt {
+      font-family: var(--font-latin); font-weight: 500; font-size: 12px;
+      background: var(--white); color: var(--ink); border-radius: 999px; padding: 0 7px;
+    }
+    .more-btn {
+      background: none; border: none; font-weight: 700; font-size: 14px; color: var(--ink);
+      text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 8px 4px;
+    }
 
-    /* Cards */
-    .card.pinned { border: 2px solid #a78bfa; }
-    .pin-badge { font-size: 14px; margin-right: 4px; }
-    mark { background: #fde68a; color: inherit; padding: 0 1px; border-radius: 2px; }
-    .meta-item { display: inline-flex; align-items: center; gap: 3px; }
+    /* ===== Cards ===== */
+    .cards {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px; align-items: start;
+    }
+    .card {
+      position: relative; background: var(--white);
+      border: 2px solid var(--ink); border-radius: 28px; padding: 14px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: transform .25s var(--bounce);
+      animation: cardIn .45s var(--bounce) backwards;
+    }
+    .card:hover { transform: translateY(-6px) rotate(-.6deg); }
+    .card:focus-within { outline: 3px solid var(--ink); outline-offset: 4px; }
+    .card-media {
+      height: 170px; border-radius: 20px; overflow: hidden;
+      background: var(--peach);
+    }
+    .card-media img, .panel-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .card-body { padding: 4px 6px 6px; display: flex; flex-direction: column; gap: 10px; }
+    .card-open {
+      all: unset; cursor: pointer; font-weight: 800; font-size: 20px; line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .card-open::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: 28px; }
+    .card-open:focus-visible { outline: none; }
+    .card-summary {
+      margin: 0; font-size: 14px; line-height: 1.7; color: var(--ink-2);
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-snippet {
+      margin: 0; font-size: 13px; line-height: 1.6; color: var(--ink-2);
+      background: var(--cream); border-radius: 12px; padding: 8px 10px;
+    }
+    .card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .mini-tag {
+      position: relative; z-index: 2;
+      border: none; border-radius: 999px; padding: 4px 10px; min-height: 28px;
+      font-weight: 700; font-size: 12px; color: var(--ink); cursor: pointer;
+      transform: rotate(var(--rot, 0deg)); transition: transform .15s ease;
+    }
+    .mini-tag:hover { transform: rotate(0deg) scale(1.08); }
+    .mini-tag.active { background: var(--ink) !important; color: var(--cream); }
+    .card-date { font-family: var(--font-latin); font-size: 12px; color: var(--muted); white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; }
+    .pin-sticker {
+      position: absolute; top: -10px; right: 18px; z-index: 3;
+      background: var(--coral); border: 2px solid var(--ink); border-radius: 10px;
+      padding: 2px 10px; font-size: 12px; font-weight: 800; transform: rotate(4deg);
+    }
+    mark { background: var(--butter); color: inherit; border-radius: 4px; padding: 0 2px; }
 
     .load-more-wrap { grid-column: 1 / -1; text-align: center; padding: 8px 0 24px; }
-    .load-more {
-      border: none; background: rgba(255,255,255,0.9); color: #5b21b6; font-weight: 600;
-      padding: 10px 24px; border-radius: 999px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .load-more:disabled { opacity: 0.6; cursor: default; }
+    .empty { grid-column: 1 / -1; text-align: center; font-weight: 800; font-size: 20px; margin: 40px 0; }
     #sentinel { height: 1px; }
 
-    /* Modal toolbar & edit */
-    .modal-toolbar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; margin-top: 4px; }
-    .tool-btn {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 6px 12px; font-size: 12px; font-weight: 600; color: #4b5563;
-      background: #fff; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; z-index: 4000;
+      transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none;
+      background: var(--ink); color: var(--cream); border-radius: 999px;
+      padding: 10px 18px; font-size: 14px; font-weight: 700;
+      transition: opacity .2s ease, transform .3s var(--bounce);
     }
-    .tool-btn:hover { background: #f3f4f6; color: #111827; border-color: #9ca3af; }
-    .tool-btn.primary { background: #667eea; border-color: #5a67d8; color: #fff; }
-    .tool-btn.primary:hover { background: #5a67d8; }
-    .tool-btn.danger:hover, .tool-btn.danger.confirm { background: #ef4444; border-color: #dc2626; color: #fff; }
-    .tool-btn:disabled { opacity: 0.6; cursor: default; }
-    .modal-summary { font-size: 14px; color: #374151; line-height: 1.6; background: #eef2ff; border-radius: 8px; padding: 10px 12px; }
-    .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-    .modal-tags span { background: #e0e7ff; color: #5b21b6; border-radius: 6px; padding: 3px 9px; font-size: 12px; font-weight: 600; }
-    .modal-raw a { color: #4f46e5; word-break: break-all; }
-    .edit-form { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
-    .edit-form label { font-size: 12px; font-weight: 600; color: #4b5563; display: flex; flex-direction: column; gap: 4px; }
-    .edit-form input, .edit-form textarea {
-      font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff;
-    }
-    .edit-form textarea { min-height: 90px; resize: vertical; }
-    .edit-form input:focus, .edit-form textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); }
-    .hint { font-weight: 400; color: #9ca3af; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Login */
+    /* ===== Expandable panel ===== */
+    .overlay {
+      position: fixed; inset: 0; z-index: 2000;
+      display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+    }
+    .overlay[hidden] { display: none; }
+    .backdrop { position: absolute; inset: 0; background: rgba(30, 58, 47, .35); }
+    .panel {
+      position: relative; z-index: 1;
+      width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 48px);
+      overflow: auto; overscroll-behavior: contain;
+      background: var(--white); border: 2px solid var(--ink); border-radius: 36px;
+      padding: 16px;
+    }
+    .panel.morphing { overflow: hidden; }
+    .panel-close-wrap { position: sticky; top: 0; height: 0; z-index: 3; }
+    .panel-close {
+      position: absolute; top: 10px; right: 10px;
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 2px solid var(--ink); background: var(--white); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .15s ease;
+    }
+    .panel-close:hover { transform: rotate(90deg); }
+    .panel-body { display: flex; flex-direction: column; gap: 16px; }
+    .panel-media { height: 240px; flex-shrink: 0; border-radius: 26px; overflow: hidden; background: var(--peach); }
+    .panel-main { padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 14px; }
+    .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding-right: 52px; }
+    .panel-media + .panel-main .panel-head { padding-right: 0; }
+    .panel-head > div { flex: 1; min-width: 0; }
+    .panel-head .pill { white-space: nowrap; flex-shrink: 0; }
+    .panel-title { margin: 0; font-weight: 800; font-size: 26px; line-height: 1.3; overflow-wrap: anywhere; }
+    .panel-date { font-family: var(--font-latin); font-size: 13px; color: var(--muted); margin-top: 6px; display: block; }
+    .panel-summary { margin: 0; font-size: 15px; line-height: 1.75; background: var(--mint-soft); border-radius: 18px; padding: 14px 16px; }
+    .panel-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .panel-tags span { border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; transform: rotate(var(--rot, 0deg)); }
+    .panel-raw {
+      font-size: 15px; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere;
+      background: var(--cream); border-radius: 18px; padding: 14px 16px;
+    }
+    .panel-raw a { color: #9A3412; }
+    .panel-images { display: flex; flex-direction: column; gap: 10px; }
+    .panel-images img { width: 100%; border-radius: 18px; display: block; }
+    .panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .panel-actions .push { margin-left: auto; }
+    .pill.danger:hover, .pill.danger.confirm { background: #B91C1C; border-color: #B91C1C; color: var(--white); }
+
+    .edit-form { display: flex; flex-direction: column; gap: 12px; }
+    .edit-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; }
+    .edit-form .hint { font-weight: 500; color: var(--muted); }
+    .edit-form input, .edit-form textarea {
+      font-size: 15px; padding: 12px 14px; border-radius: 16px;
+      border: 2px solid var(--line); background: var(--cream); outline: none;
+    }
+    .edit-form input:focus, .edit-form textarea:focus { border-color: var(--ink); }
+    .edit-form textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
+
+    /* ===== Login ===== */
     .login-screen {
-      position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 3000;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      position: fixed; inset: 0; z-index: 3000; background: var(--cream);
+      display: none; align-items: center; justify-content: center; padding: 16px; overflow: hidden;
     }
     .login-screen.open { display: flex; }
     .login-box {
-      background: rgba(255,255,255,0.97); border-radius: 16px; padding: 28px 24px; width: min(340px, calc(100vw - 32px));
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; gap: 12px; text-align: center;
+      position: relative; z-index: 1; width: min(360px, 100%);
+      background: var(--white); border: 2px solid var(--ink); border-radius: 32px;
+      padding: 28px 24px; display: flex; flex-direction: column; gap: 14px; text-align: center;
     }
-    .login-box h2 { margin: 0; font-size: 22px; color: #1f2937; }
-    .login-box input { padding: 12px 14px; border-radius: 10px; border: 2px solid #e5e7eb; font-size: 15px; }
-    .login-box input:focus { outline: none; border-color: #667eea; }
-    .login-box button {
-      padding: 12px; border: none; border-radius: 10px; color: #fff; font-weight: 600; font-size: 15px; cursor: pointer;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    .login-box .home-mark { margin: 0 auto; }
+    .login-box h1 { margin: 0; font-family: var(--font-latin); font-weight: 600; font-size: 30px; }
+    .login-box input {
+      padding: 14px 18px; border-radius: 999px; border: 2px solid var(--line);
+      background: var(--cream); font-size: 16px; outline: none; text-align: center;
     }
-    .login-error { color: #dc2626; font-size: 13px; min-height: 18px; }
+    .login-box input:focus { border-color: var(--ink); }
+    .login-box .pill { min-height: 52px; font-size: 16px; }
+    .login-error { color: #B91C1C; font-size: 14px; font-weight: 700; min-height: 20px; }
 
+    /* ===== Animations ===== */
+    @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner {
+      display: inline-block; width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid rgba(255, 246, 229, .35); border-top-color: var(--cream);
+      animation: spin .8s linear infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+
+    /* ===== Responsive ===== */
     @media (max-width: 768px) {
-      .header-actions { position: static; justify-content: center; margin-top: 10px; }
-      .result-info { margin-left: 0; width: 100%; }
+      .wrap { padding: 28px 16px 80px; gap: 22px; }
+      .home-title { font-size: 34px; }
+      .home-mark { width: 50px; height: 50px; border-radius: 16px; }
+      .search-box { border-radius: 26px; padding: 14px; }
+      .search-row .pill { padding: 0 20px; }
+      .cards { grid-template-columns: 1fr; }
+      .card:hover { transform: none; }
+      .blob-a { width: 300px; height: 300px; top: -150px; right: -120px; }
+      .blob-b { display: none; }
+      .panel { border-radius: 28px; padding: 12px; }
+      .panel-media { height: 200px; border-radius: 20px; }
+      .panel-main { padding: 4px 6px 8px; }
+      .panel-close { top: 8px; right: 8px; }
+    }
+    @media (max-width: 520px) {
+      .panel-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .panel-head > div { width: 100%; }
     }
   </style>
 </head>
 <body>
+  <div class="blob blob-a" aria-hidden="true"></div>
+  <div class="blob blob-b" aria-hidden="true"></div>
+
   <!-- 登入 -->
   <div id="loginScreen" class="login-screen">
+    <div class="blob blob-a" aria-hidden="true"></div>
     <form id="loginForm" class="login-box">
-      <h2>⭐ Shu's MyMind</h2>
+      <span class="home-mark" aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1E3A2F" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>
+      </span>
+      <h1>Shu's MyMind</h1>
+      <label class="sr-only" for="loginPassword">密碼</label>
       <input id="loginPassword" type="password" placeholder="請輸入密碼" autocomplete="current-password" required />
-      <button type="submit" id="loginBtn">登入</button>
-      <div id="loginError" class="login-error"></div>
+      <button type="submit" id="loginBtn" class="pill pill-ink">登入</button>
+      <div id="loginError" class="login-error" role="alert"></div>
     </form>
   </div>
 
-  <div class="container">
-    <div class="header">
-      <h1>⭐ Shu's MyMind</h1>
-      <div class="subtitle">填充、歸納、壯大、使用</div>
-      <div class="header-actions">
-        <button id="logoutBtn" class="ghost-btn" type="button">登出</button>
+  <div class="wrap">
+    <header class="top">
+      <a href="/" id="homeLink" class="home" aria-label="Shu's MyMind，回到首頁">
+        <span class="home-mark" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1E3A2F" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>
+        </span>
+        <span class="home-text">
+          <span class="home-title">Shu's MyMind</span>
+          <span class="home-sub">填充、歸納、壯大、使用</span>
+        </span>
+      </a>
+      <div class="top-actions">
+        <span id="resultInfo" class="count-pill"></span>
+        <button id="logoutBtn" class="pill" type="button">登出</button>
       </div>
-    </div>
+    </header>
 
-    <div class="search-wrapper">
-      <div class="search-bar">
-        <div class="search-input-wrapper">
-          <div class="search-icon">
-            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-          </div>
-          <input id="searchInput" type="search" placeholder="搜尋標題、摘要、內容或標籤…" title="多個關鍵字用空白分隔" />
+    <section class="search-box" aria-label="搜尋與篩選">
+      <form id="searchForm" class="search-row" role="search">
+        <label class="sr-only" for="searchInput">搜尋知識庫</label>
+        <div class="search-field">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E3A2F" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <input id="searchInput" type="search" placeholder="想找什麼？標題、內容、標籤都可以" title="多個關鍵字用空白分隔" />
         </div>
-        <button id="searchBtn">
-          <span class="btn-text">搜尋</span>
-        </button>
-      </div>
+        <button id="searchBtn" class="pill pill-ink" type="submit">搜尋</button>
+      </form>
       <div class="filter-row">
-        <div class="type-group" id="typeGroup">
-          <button class="type-btn" data-type="">全部</button>
-          <button class="type-btn" data-type="image">🖼 有圖</button>
-          <button class="type-btn" data-type="link">🔗 有連結</button>
-          <button class="type-btn" data-type="text">📝 純文字</button>
+        <div class="type-group" id="typeGroup" role="group" aria-label="類型">
+          <button class="type-btn" type="button" data-type="">全部</button>
+          <button class="type-btn" type="button" data-type="image">有圖</button>
+          <button class="type-btn" type="button" data-type="link">有連結</button>
+          <button class="type-btn" type="button" data-type="text">純文字</button>
         </div>
         <div class="active-filters" id="activeFilters"></div>
-        <div class="result-info" id="resultInfo"></div>
       </div>
-    </div>
+    </section>
 
-    <div class="layout">
-      <aside class="sidebar">
-        <div class="sidebar-title">📂 標籤分類 <span class="hint">（可複選）</span></div>
-        <div id="sidebarTags" class="sidebar-tags"></div>
-      </aside>
+    <nav id="tagNav" class="tag-nav" aria-label="標籤（可複選）"></nav>
 
-      <main class="main">
-        <div id="cards" class="cards"></div>
-        <div id="sentinel"></div>
-      </main>
-    </div>
+    <main>
+      <div id="cards" class="cards"></div>
+      <div id="sentinel"></div>
+    </main>
   </div>
 
-  <div class="status-bar"><div id="status" style="display:none"></div></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <div id="rawModal" class="modal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-content">
-      <button id="modalClose" class="modal-close" aria-label="關閉">&times;</button>
-      <div id="modalBody" style="display:flex;flex-direction:column;gap:8px;min-height:0;flex:1;"></div>
+  <div id="overlay" class="overlay" hidden>
+    <div class="backdrop" id="backdrop"></div>
+    <div id="panel" class="panel" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+      <div class="panel-close-wrap">
+        <button id="panelClose" class="panel-close" type="button" aria-label="關閉">
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E3A2F" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div id="panelBody" class="panel-body"></div>
     </div>
   </div>
 
@@ -697,65 +417,92 @@
   const searchInput = $("searchInput");
   const searchBtn = $("searchBtn");
   const cardsEl = $("cards");
-  const statusEl = $("status");
-  const sidebarTagsEl = $("sidebarTags");
+  const tagNavEl = $("tagNav");
   const activeFiltersEl = $("activeFilters");
   const resultInfoEl = $("resultInfo");
   const typeGroupEl = $("typeGroup");
   const sentinelEl = $("sentinel");
-  const rawModal = $("rawModal");
-  const modalBody = $("modalBody");
+  const overlayEl = $("overlay");
+  const backdropEl = $("backdrop");
+  const panelEl = $("panel");
+  const panelBody = $("panelBody");
+  const toastEl = $("toast");
 
-  const SYSTEM_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
+  const TAG_COLOR = {
+    "親子": "#FFC8A6", "教育": "#FFE27A", "AI": "#BFE0FF", "資訊": "#BFE0FF", "健康": "#BDEBD3",
+    "旅遊": "#FFE27A", "趣味": "#FFC8A6", "購物": "#FFD6E0", "興趣": "#BDEBD3",
+  };
+  const CUSTOM_TAG_COLOR = "#EFE8D8";
+  const MEDIA_COLORS = ["#FFC8A6", "#FFE27A", "#BDEBD3", "#BFE0FF", "#FFD6E0"];
+  const ROTS = ["-3deg", "2deg", "-1.5deg", "3deg", "-2.5deg", "1deg"];
   const PAGE_SIZE = 30;
-  const TOP_TAGS = 10;
+  const TOP_TAGS = 12;
   const URL_RE = /(https?:\/\/[^\s<>"'）)】]+)/g;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ========= 狀態 ========= */
   const state = { q: "", tags: [], type: "", items: [], total: 0, loading: false, reqId: 0 };
   let tagCounts = [];
   let tagsExpanded = false;
   let currentRow = null;
+  let panelAnimating = false;
 
   /* ========= 小工具 ========= */
   function el(tag, props = {}, children = []) {
     const node = document.createElement(tag);
     for (const [k, v] of Object.entries(props)) {
+      if (v == null) continue;
       if (k === "class") node.className = v;
       else if (k === "text") node.textContent = v;
+      else if (k === "style") node.style.cssText = v;
       else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
       else node.setAttribute(k, v);
     }
-    for (const c of [].concat(children)) if (c != null) node.append(c);
+    for (const c of [].concat(children)) if (c != null && c !== false) node.append(c);
     return node;
   }
 
-  function showStatus(text, autoHideMs = 0) {
-    statusEl.textContent = text;
-    statusEl.style.display = text ? "block" : "none";
-    if (autoHideMs) setTimeout(() => { if (statusEl.textContent === text) statusEl.style.display = "none"; }, autoHideMs);
+  function svgIcon(path, size = 14) {
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("width", size); svg.setAttribute("height", size);
+    svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor"); svg.setAttribute("stroke-width", "2.6");
+    svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("aria-hidden", "true");
+    const p = document.createElementNS(ns, "path"); p.setAttribute("d", path);
+    svg.append(p);
+    return svg;
+  }
+  const ICON_X = "M6 6l12 12M18 6L6 18";
+  const ICON_LINK = "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1";
+
+  let toastTimer;
+  function toast(text, ms = 1800) {
+    clearTimeout(toastTimer);
+    toastEl.textContent = text;
+    toastEl.classList.add("show");
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), ms);
   }
 
   function fmtTime(iso) {
     return iso ? new Date(iso).toLocaleString("zh-TW", {
-      year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+      year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
     }) : "";
   }
 
-  function hasImage(row) { return Array.isArray(row.attachments) && row.attachments.some(a => a?.type === "image"); }
+  function tagColor(t) { return TAG_COLOR[t] || CUSTOM_TAG_COLOR; }
+  function images(row) { return (Array.isArray(row.attachments) ? row.attachments : []).filter(a => a?.type === "image" && a.url); }
   function hasLink(row) { return /https?:\/\//i.test(row.raw_text || ""); }
-
+  function mediaColor(row) { return MEDIA_COLORS[Math.abs(Number(row.id) || 0) % MEDIA_COLORS.length]; }
   function searchTerms() { return state.q.split(/\s+/).filter(Boolean); }
 
-  // 把 text 放進 node，關鍵字用 <mark> 標示（不使用 innerHTML，避免 XSS）
+  // 關鍵字用 <mark> 標示（不使用 innerHTML，避免 XSS）
   function setHighlighted(node, text) {
     node.textContent = "";
     const terms = searchTerms();
     if (!terms.length || !text) { node.textContent = text || ""; return; }
     const re = new RegExp(`(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
-    text.split(re).forEach((part, i) => {
-      node.append(i % 2 ? el("mark", { text: part }) : document.createTextNode(part));
-    });
+    text.split(re).forEach((part, i) => node.append(i % 2 ? el("mark", { text: part }) : document.createTextNode(part)));
   }
 
   function setLinkified(node, text) {
@@ -765,6 +512,19 @@
         ? el("a", { href: part, target: "_blank", rel: "noopener noreferrer", text: part })
         : document.createTextNode(part));
     });
+  }
+
+  // 關鍵字只出現在原文時，擷取一小段讓人知道為什麼被搜到
+  function rawSnippet(row) {
+    const terms = searchTerms().map(t => t.toLowerCase());
+    if (!terms.length || !row.raw_text) return null;
+    const hay = `${row.title || ""} ${row.summary || ""}`.toLowerCase();
+    if (terms.every(t => hay.includes(t))) return null;
+    const raw = row.raw_text.replace(/\s+/g, " ");
+    const idx = Math.min(...terms.map(t => raw.toLowerCase().indexOf(t)).filter(i => i >= 0));
+    if (!isFinite(idx)) return null;
+    const start = Math.max(0, idx - 20);
+    return (start > 0 ? "…" : "") + raw.slice(start, start + 70) + (start + 70 < raw.length ? "…" : "");
   }
 
   /* ========= API ========= */
@@ -803,7 +563,8 @@
 
   $("logoutBtn").addEventListener("click", async () => {
     await api("/api/session", { method: "DELETE" }).catch(() => {});
-    cardsEl.innerHTML = ""; sidebarTagsEl.innerHTML = "";
+    closePanel(true);
+    cardsEl.innerHTML = ""; tagNavEl.innerHTML = ""; resultInfoEl.textContent = "";
     showLogin();
   });
 
@@ -820,27 +581,37 @@
     if (state.q) p.set("q", state.q);
     if (state.tags.length) p.set("tags", state.tags.join(","));
     if (state.type) p.set("type", state.type);
-    const url = p.toString() ? `?${p}` : location.pathname;
-    if (url === location.search || (!p.toString() && !location.search)) return;
-    history[push ? "pushState" : "replaceState"](null, "", url);
+    const qs = p.toString();
+    if ((qs ? `?${qs}` : "") === location.search) return;
+    history[push ? "pushState" : "replaceState"](null, "", qs ? `?${qs}` : location.pathname);
   }
 
-  window.addEventListener("popstate", () => { readUrl(); search(false); });
+  window.addEventListener("popstate", () => { closePanel(true); readUrl(); search(false); });
 
-  /* ========= 篩選 UI ========= */
+  /* ========= 標題 → 首頁 ========= */
+  $("homeLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    closePanel(true);
+    state.q = ""; state.tags = []; state.type = "";
+    search(true);
+  });
+
+  /* ========= 篩選 ========= */
   function renderFilters() {
     searchInput.value = state.q;
-    typeGroupEl.querySelectorAll(".type-btn").forEach(b => b.classList.toggle("active", b.dataset.type === state.type));
-
+    typeGroupEl.querySelectorAll(".type-btn").forEach(b => {
+      const on = b.dataset.type === state.type;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", on);
+    });
     activeFiltersEl.innerHTML = "";
     state.tags.forEach(t => {
       activeFiltersEl.append(el("button", {
-        class: "filter-chip", title: "移除這個標籤",
-        onclick: () => toggleTag(t),
-      }, [`#${t}`, el("span", { class: "x", text: "×" })]));
+        class: "filter-chip", type: "button", "aria-label": `移除標籤 ${t}`, onclick: () => toggleTag(t),
+      }, [t, svgIcon(ICON_X, 12)]));
     });
     if (state.q || state.tags.length || state.type) {
-      activeFiltersEl.append(el("button", { class: "clear-btn", text: "清除全部", onclick: clearAll }));
+      activeFiltersEl.append(el("button", { class: "clear-btn", type: "button", text: "清除全部", onclick: clearAll }));
     }
   }
 
@@ -861,122 +632,131 @@
     search(true);
   });
 
-  function runKeywordSearch() { state.q = searchInput.value.trim(); search(true); }
-  searchBtn.addEventListener("click", runKeywordSearch);
-  searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") runKeywordSearch(); });
+  $("searchForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    state.q = searchInput.value.trim();
+    search(true);
+  });
 
-  /* ========= 側欄標籤（全庫統計） ========= */
+  /* ========= 標籤貼紙（全庫統計） ========= */
   async function loadTags() {
     try {
       const json = await api("/api/tags");
       tagCounts = json.data || [];
     } catch (e) { if (e.message !== "unauthorized") console.error(e); }
-    renderSidebar();
+    renderTagNav();
   }
 
-  function tagBtn(tag, count) {
+  function sticker(tag, count, i) {
+    const on = state.tags.includes(tag);
     const btn = el("button", {
-      class: "sidebar-tag" + (state.tags.includes(tag) ? " active" : ""),
+      class: "sticker" + (on ? " active" : ""), type: "button", "aria-pressed": on,
       onclick: () => toggleTag(tag),
     }, [tag, count != null ? el("span", { class: "cnt", text: count }) : null]);
+    btn.style.background = tagColor(tag);
+    btn.style.setProperty("--rot", ROTS[i % ROTS.length]);
     return btn;
   }
 
-  function renderSidebar() {
-    sidebarTagsEl.innerHTML = "";
-    const top = el("div", { class: "tags-group" });
-    top.append(el("button", {
-      class: "sidebar-tag" + (!state.tags.length ? " active" : ""),
-      text: "全部",
-      onclick: () => { state.tags = []; search(true); },
-    }));
-
-    // 已選但不在統計中的標籤也顯示（例如網址帶進來的）
+  function renderTagNav() {
+    tagNavEl.innerHTML = "";
     const known = new Set(tagCounts.map(t => t.tag));
     const list = [...tagCounts, ...state.tags.filter(t => !known.has(t)).map(t => ({ tag: t, count: 0 }))];
-
-    list.slice(0, TOP_TAGS).forEach(({ tag, count }) => top.append(tagBtn(tag, count)));
-    sidebarTagsEl.append(top);
-
-    const rest = list.slice(TOP_TAGS);
-    if (rest.length) {
-      const activeInRest = rest.some(r => state.tags.includes(r.tag));
-      const open = tagsExpanded || activeInRest;
-      const hidden = el("div", { class: "tags-hidden-area" + (open ? " show" : "") });
-      rest.forEach(({ tag, count }) => hidden.append(tagBtn(tag, count)));
-      const toggle = el("button", {
-        class: "sidebar-toggle-btn",
-        text: open ? "收起標籤" : `查看更多 (${rest.length})`,
-        onclick: () => { tagsExpanded = !open; renderSidebar(); },
-      });
-      sidebarTagsEl.append(hidden, toggle);
+    const activeHidden = list.slice(TOP_TAGS).some(t => state.tags.includes(t.tag));
+    const showAll = tagsExpanded || activeHidden;
+    const shown = showAll ? list : list.slice(0, TOP_TAGS);
+    shown.forEach(({ tag, count }, i) => tagNavEl.append(sticker(tag, count, i)));
+    if (list.length > TOP_TAGS) {
+      tagNavEl.append(el("button", {
+        class: "more-btn", type: "button",
+        text: showAll ? "收起" : `還有 ${list.length - TOP_TAGS} 個標籤`,
+        onclick: () => { tagsExpanded = !showAll; renderTagNav(); },
+      }));
     }
   }
 
   /* ========= 卡片 ========= */
   function buildCard(row, index) {
-    const card = el("div", { class: "card" + (row.pinned ? " pinned" : "") });
+    const card = el("article", { class: "card" + (row.pinned ? " pinned" : ""), "data-id": row.id });
     card.style.animationDelay = `${(index % PAGE_SIZE) * 0.03}s`;
-    card.addEventListener("click", () => openModal(row));
+    if (currentRow && String(currentRow.id) === String(row.id)) card.style.visibility = "hidden";
 
-    const img = Array.isArray(row.attachments) && row.attachments.find(a => a?.type === "image");
-    if (img) card.append(el("img", { class: "card-img", src: `${img.url}?width=400`, loading: "lazy", alt: "" }));
+    if (row.pinned) card.append(el("span", { class: "pin-sticker", text: "置頂" }));
 
-    const title = el("div", { class: "card-title" });
-    if (row.pinned) title.append(el("span", { class: "pin-badge", text: "📌", title: "已置頂" }));
-    const titleText = el("span");
-    setHighlighted(titleText, row.title || "📝 無標題記錄");
-    title.append(titleText);
+    const img = images(row)[0];
+    if (img) {
+      const media = el("div", { class: "card-media", "aria-hidden": "true" }, [
+        el("img", { src: `${img.url}?width=640`, loading: "lazy", alt: "" }),
+      ]);
+      media.style.background = mediaColor(row);
+      card.append(media);
+    }
 
-    const summary = el("div", { class: "card-summary" });
-    setHighlighted(summary, row.summary || "暫無摘要內容");
+    const body = el("div", { class: "card-body" });
+    const openBtn = el("button", { class: "card-open", type: "button" });
+    setHighlighted(openBtn, row.title || "無標題記錄");
+    openBtn.addEventListener("click", () => openPanel(row, card));
+    body.append(openBtn);
 
+    if (row.summary) {
+      const summary = el("p", { class: "card-summary" });
+      setHighlighted(summary, row.summary);
+      body.append(summary);
+    }
+
+    const snip = rawSnippet(row);
+    if (snip) {
+      const p = el("p", { class: "card-snippet" });
+      setHighlighted(p, snip);
+      body.append(p);
+    }
+
+    const tags = Array.isArray(row.tags) ? row.tags : [];
     const tagsDiv = el("div", { class: "card-tags" });
-    (Array.isArray(row.tags) ? row.tags : []).forEach(t => {
-      const isSystem = SYSTEM_TAGS.includes(t);
-      const active = state.tags.includes(t);
-      const span = el("span", { text: `#${t}`, title: active ? "取消這個標籤" : "加入標籤篩選" });
-      span.style.background = active
-        ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-        : isSystem ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)" : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
-      span.style.color = active ? "#fff" : isSystem ? "#5b21b6" : "#374151";
-      span.addEventListener("click", (e) => { e.stopPropagation(); toggleTag(t); });
-      tagsDiv.append(span);
+    tags.forEach((t, i) => {
+      const on = state.tags.includes(t);
+      const b = el("button", {
+        class: "mini-tag" + (on ? " active" : ""), type: "button", text: t,
+        title: on ? "取消這個標籤" : "加入標籤篩選",
+        onclick: (e) => { e.stopPropagation(); toggleTag(t); },
+      });
+      b.style.background = tagColor(t);
+      b.style.setProperty("--rot", ROTS[i % ROTS.length]);
+      tagsDiv.append(b);
     });
-
-    const meta = el("div", { class: "card-meta" }, [
-      el("span", { class: "meta-item", text: `🕐 ${fmtTime(row.created_at)}` }),
-      hasImage(row) ? el("span", { class: "meta-item", text: "🖼" }) : null,
-      hasLink(row) ? el("span", { class: "meta-item", text: "🔗" }) : null,
+    const date = el("span", { class: "card-date" }, [
+      hasLink(row) ? el("span", { title: "含連結", style: "display:inline-flex" }, [svgIcon(ICON_LINK, 13)]) : null,
+      fmtTime(row.created_at),
     ]);
-
-    const raw = el("div", { class: "card-raw" });
-    setHighlighted(raw, row.raw_text || "無原始內容");
-
-    card.append(title, summary);
-    if (tagsDiv.childNodes.length) card.append(tagsDiv);
-    card.append(meta, raw);
+    body.append(el("div", { class: "card-foot" }, [tagsDiv, date]));
+    card.append(body);
     return card;
   }
 
   function renderCards(fromIndex = 0) {
     if (fromIndex === 0) cardsEl.innerHTML = "";
     cardsEl.querySelector(".load-more-wrap")?.remove();
+    cardsEl.querySelector(".empty")?.remove();
 
     if (!state.items.length) {
       const filtered = state.q || state.tags.length || state.type;
-      cardsEl.innerHTML = "";
-      cardsEl.append(el("div", { class: "empty", style: "grid-column:1/-1",
-        text: filtered ? "🔍 沒有符合的記錄，試試減少篩選條件" : "📭 暫無記錄，從 Telegram 傳點東西進來吧！" }));
+      cardsEl.append(el("p", { class: "empty",
+        text: filtered ? "沒有符合的記錄，試試減少篩選條件。" : "這裡還空空的，從 Telegram 丟點東西進來吧。" }));
     } else {
       state.items.slice(fromIndex).forEach((row, i) => cardsEl.append(buildCard(row, fromIndex + i)));
       if (state.items.length < state.total) {
         cardsEl.append(el("div", { class: "load-more-wrap" }, [
-          el("button", { class: "load-more", text: `載入更多（還有 ${state.total - state.items.length} 筆）`, onclick: loadPage }),
+          el("button", { class: "pill pill-white", type: "button",
+            text: `載入更多（還有 ${state.total - state.items.length} 筆）`, onclick: loadPage }),
         ]));
       }
     }
-    resultInfoEl.textContent = state.items.length ? `共 ${state.total} 筆` : "";
+    const filtered = state.q || state.tags.length || state.type;
+    resultInfoEl.textContent = state.loading && !state.items.length ? "" : (filtered ? `找到 ${state.total} 筆` : `共 ${state.total} 筆`);
+  }
+
+  function findCardEl(id) {
+    return cardsEl.querySelector(`.card[data-id="${CSS.escape(String(id))}"]`);
   }
 
   /* ========= 資料載入 ========= */
@@ -984,8 +764,8 @@
     state.items = []; state.total = 0;
     writeUrl(push);
     renderFilters();
-    renderSidebar();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    renderTagNav();
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
     loadPage();
   }
 
@@ -995,7 +775,6 @@
     state.loading = true;
     const first = state.items.length === 0;
     if (first) { searchBtn.disabled = true; searchBtn.innerHTML = '<span class="spinner"></span>'; }
-    showStatus(first ? (state.q || state.tags.length || state.type ? "搜尋中..." : "載入中...") : "載入更多...");
 
     const p = new URLSearchParams({ limit: PAGE_SIZE, offset: state.items.length });
     if (state.q) p.set("q", state.q);
@@ -1004,61 +783,211 @@
 
     try {
       const json = await api(`/api/notes?${p}`);
-      if (myReq !== state.reqId) return; // 已有更新的請求
+      if (myReq !== state.reqId) return;
       const from = state.items.length;
       state.items.push(...(json.data || []));
       state.total = json.total || 0;
+      state.loading = false;
       renderCards(from);
-      showStatus("");
     } catch (err) {
       if (myReq !== state.reqId || err.message === "unauthorized") return;
       console.error(err);
-      showStatus("❌ 載入錯誤：" + err.message, 4000);
+      toast("載入失敗：" + err.message, 4000);
     } finally {
       if (myReq === state.reqId) {
         state.loading = false;
-        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+        searchBtn.textContent = "搜尋";
         searchBtn.disabled = false;
       }
     }
   }
 
-  // 捲到底自動載入下一頁
   new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting && !state.loading && state.items.length && state.items.length < state.total) loadPage();
   }, { rootMargin: "400px" }).observe(sentinelEl);
 
-  /* ========= Modal ========= */
-  function openModal(row) {
+  /* ========= 展開卡片（容器變形動畫） ========= */
+  const OPEN_MS = 460, CLOSE_MS = 360;
+  const EASE_OPEN = "cubic-bezier(.2, .9, .25, 1)";
+  const EASE_CLOSE = "cubic-bezier(.4, 0, .2, 1)";
+
+  function rectStyle(r, radius) {
+    return { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`, borderRadius: `${radius}px` };
+  }
+
+  function pinPanel(r) {
+    panelEl.style.position = "fixed";
+    panelEl.style.margin = "0";
+    panelEl.style.left = `${r.left}px`; panelEl.style.top = `${r.top}px`;
+    panelEl.style.width = `${r.width}px`; panelEl.style.height = `${r.height}px`;
+    panelEl.style.maxHeight = "none";
+  }
+
+  function unpinPanel() {
+    ["position", "margin", "left", "top", "width", "height", "maxHeight", "visibility"].forEach(k => { panelEl.style[k] = ""; });
+    panelEl.classList.remove("morphing");
+  }
+
+  // 依照置中後的最終大小量測
+  function measureFinalRect() {
+    unpinPanel();
+    panelEl.style.visibility = "hidden";
+    const r = panelEl.getBoundingClientRect();
+    panelEl.style.visibility = "";
+    return { left: r.left, top: r.top, width: r.width, height: r.height };
+  }
+
+  function openPanel(row, cardEl) {
+    if (panelAnimating) return;
     currentRow = row;
-    renderModalView();
-    rawModal.classList.add("open");
+    renderPanelView();
+    overlayEl.hidden = false;
+    document.body.style.overflow = "hidden";
+
+    const to = measureFinalRect();
+    const from = cardEl?.getBoundingClientRect();
+    const canMorph = !reduceMotion && from && from.bottom > 0 && from.top < innerHeight;
+
+    if (cardEl) cardEl.style.visibility = "hidden";
+    $("panelClose").focus({ preventScroll: true });
+
+    if (!canMorph) {
+      backdropEl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 });
+      return;
+    }
+
+    panelAnimating = true;
+    panelEl.classList.add("morphing");
+    pinPanel(to);
+    backdropEl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: OPEN_MS * .7, easing: "ease-out" });
+    const anim = panelEl.animate([rectStyle(from, 28), rectStyle(to, 36)], { duration: OPEN_MS, easing: EASE_OPEN });
+
+    // 圖片高度與內容淡入
+    const media = panelBody.querySelector(".panel-media");
+    const cardMedia = cardEl.querySelector(".card-media");
+    if (media && cardMedia) {
+      media.animate([{ height: `${cardMedia.offsetHeight}px`, borderRadius: "20px" }, { height: getComputedStyle(media).height, borderRadius: getComputedStyle(media).borderRadius }],
+        { duration: OPEN_MS, easing: EASE_OPEN });
+    }
+    panelBody.querySelectorAll(".fade-in").forEach((n) => {
+      n.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }],
+        { duration: 260, delay: OPEN_MS * .45, easing: "ease-out", fill: "backwards" });
+    });
+    $("panelClose").animate([{ opacity: 0, transform: "scale(.6)" }, { opacity: 1, transform: "none" }],
+      { duration: 240, delay: OPEN_MS * .5, easing: "ease-out", fill: "backwards" });
+
+    anim.onfinish = anim.oncancel = () => { unpinPanel(); panelAnimating = false; };
   }
 
-  function closeModal() {
-    rawModal.classList.remove("open");
-    currentRow = null;
+  function closePanel(instant = false) {
+    if (overlayEl.hidden || (panelAnimating && !instant)) return;
+    const id = currentRow?.id;
+    const cardEl = id != null ? findCardEl(id) : null;
+
+    const finish = () => {
+      overlayEl.hidden = true;
+      unpinPanel();
+      panelEl.getAnimations({ subtree: true }).forEach(a => a.cancel());
+      backdropEl.getAnimations().forEach(a => a.cancel());
+      panelBody.innerHTML = "";
+      document.body.style.overflow = "";
+      currentRow = null;
+      panelAnimating = false;
+      if (cardEl) {
+        cardEl.style.visibility = "";
+        if (!instant) cardEl.querySelector(".card-open")?.focus({ preventScroll: true });
+      }
+    };
+
+    if (instant || reduceMotion) return finish();
+
+    const from = panelEl.getBoundingClientRect();
+    const to = cardEl?.getBoundingClientRect();
+    const onScreen = to && to.bottom > 0 && to.top < innerHeight;
+    panelAnimating = true;
+    backdropEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: CLOSE_MS, easing: "ease-in", fill: "forwards" });
+
+    if (!onScreen) {
+      panelEl.animate([{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(.94)" }],
+        { duration: 200, easing: "ease-in", fill: "forwards" }).onfinish = finish;
+      return;
+    }
+
+    panelEl.scrollTop = 0;
+    panelEl.classList.add("morphing");
+    pinPanel(from);
+    panelBody.querySelectorAll(".fade-in").forEach((n) => n.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 120, fill: "forwards" }));
+    $("panelClose").animate([{ opacity: 1 }, { opacity: 0 }], { duration: 100, fill: "forwards" });
+    const media = panelBody.querySelector(".panel-media");
+    const cardMedia = cardEl.querySelector(".card-media");
+    if (media && cardMedia) {
+      media.animate([{ height: getComputedStyle(media).height }, { height: `${cardMedia.offsetHeight}px`, borderRadius: "20px" }],
+        { duration: CLOSE_MS, easing: EASE_CLOSE, fill: "forwards" });
+    }
+    panelEl.animate([rectStyle(from, 36), rectStyle(to, 28)], { duration: CLOSE_MS, easing: EASE_CLOSE, fill: "forwards" }).onfinish = finish;
   }
 
-  $("modalClose").addEventListener("click", closeModal);
-  rawModal.addEventListener("click", (e) => { if (e.target.classList.contains("modal-backdrop")) closeModal(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && rawModal.classList.contains("open")) closeModal(); });
+  $("panelClose").addEventListener("click", () => closePanel());
+  backdropEl.addEventListener("click", () => closePanel());
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlayEl.hidden) closePanel(); });
 
   function replaceItem(updated) {
-    const i = state.items.findIndex(r => r.id === updated.id);
+    const i = state.items.findIndex(r => String(r.id) === String(updated.id));
     if (i !== -1) state.items[i] = { ...state.items[i], ...updated };
     return i !== -1 ? state.items[i] : updated;
   }
 
-  function renderModalView() {
+  function renderPanelView() {
     const row = currentRow;
-    modalBody.innerHTML = "";
+    panelBody.innerHTML = "";
+    const imgs = images(row);
 
-    const title = el("div", { class: "modal-title" }, [row.pinned ? "📌 " : "", row.title || "📝 無標題記錄"]);
-    const header = el("div", { class: "modal-header-row" }, [title]);
-    const time = el("div", { class: "modal-time", text: row.created_at ? `建立時間：${fmtTime(row.created_at)}` : "" });
+    if (imgs.length) {
+      const media = el("div", { class: "panel-media" }, [
+        el("a", { href: imgs[0].url, target: "_blank", rel: "noopener", "aria-label": "開啟原圖" },
+          [el("img", { src: `${imgs[0].url}?width=1200`, alt: "" })]),
+      ]);
+      media.style.background = mediaColor(row);
+      panelBody.append(media);
+    }
 
-    const pinBtn = el("button", { class: "tool-btn", text: row.pinned ? "📌 取消置頂" : "📌 置頂" });
+    const copyBtn = el("button", { class: "pill pill-coral", type: "button", text: "複製內容" });
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(row.raw_text || "").then(() => {
+        copyBtn.textContent = "已複製";
+        setTimeout(() => { copyBtn.textContent = "複製內容"; }, 1800);
+      }).catch(() => toast("複製失敗"));
+    });
+
+    const head = el("div", { class: "panel-head" }, [
+      el("div", {}, [
+        el("h2", { class: "panel-title", id: "panelTitle", text: row.title || "無標題記錄" }),
+        el("span", { class: "panel-date", text: `${row.pinned ? "已置頂 · " : ""}${fmtTime(row.created_at)}` }),
+      ]),
+      copyBtn,
+    ]);
+
+    const rest = [];
+    if (row.summary) rest.push(el("p", { class: "panel-summary", text: row.summary }));
+    const tags = Array.isArray(row.tags) ? row.tags : [];
+    if (tags.length) {
+      rest.push(el("div", { class: "panel-tags" }, tags.map((t, i) => {
+        const s = el("span", { text: t });
+        s.style.background = tagColor(t);
+        s.style.setProperty("--rot", ROTS[i % ROTS.length]);
+        return s;
+      })));
+    }
+    const raw = el("div", { class: "panel-raw" });
+    setLinkified(raw, row.raw_text || "無原始內容");
+    rest.push(raw);
+    if (imgs.length > 1) {
+      rest.push(el("div", { class: "panel-images" }, imgs.slice(1).map(a =>
+        el("a", { href: a.url, target: "_blank", rel: "noopener" }, [el("img", { src: `${a.url}?width=1200`, alt: "", loading: "lazy" })]))));
+    }
+
+    // 動作列
+    const pinBtn = el("button", { class: "pill pill-white", type: "button", text: row.pinned ? "取消置頂" : "置頂" });
     pinBtn.addEventListener("click", async () => {
       pinBtn.disabled = true;
       try {
@@ -1066,101 +995,85 @@
           method: "PATCH", body: JSON.stringify({ pinned: !row.pinned }),
         });
         currentRow = replaceItem(data);
-        renderModalView();
-        search(false); // 置頂會改變排序，重新載入
-        showStatus(data.pinned ? "已置頂" : "已取消置頂", 1500);
-      } catch (e) { showStatus("❌ " + e.message, 3000); pinBtn.disabled = false; }
+        renderPanelView();
+        toast(data.pinned ? "已置頂" : "已取消置頂");
+        reloadKeepPanel();
+      } catch (e) { toast(e.message, 3000); pinBtn.disabled = false; }
     });
 
-    const editBtn = el("button", { class: "tool-btn", text: "✏️ 編輯", onclick: renderModalEdit });
+    const editBtn = el("button", { class: "pill pill-white", type: "button", text: "編輯", onclick: renderPanelEdit });
 
-    const copyBtn = el("button", { class: "tool-btn", text: "📋 複製內容" });
-    copyBtn.addEventListener("click", () => {
-      navigator.clipboard.writeText(row.raw_text || "").then(() => {
-        copyBtn.textContent = "✓ 已複製";
-        setTimeout(() => { copyBtn.textContent = "📋 複製內容"; }, 2000);
-      }).catch(() => showStatus("❌ 複製失敗", 2000));
-    });
-
-    const delBtn = el("button", { class: "tool-btn danger", text: "🗑 刪除" });
+    const delBtn = el("button", { class: "pill pill-white danger push", type: "button", text: "刪除" });
     let confirmTimer;
     delBtn.addEventListener("click", async () => {
       if (!delBtn.classList.contains("confirm")) {
         delBtn.classList.add("confirm"); delBtn.textContent = "確定刪除？";
-        confirmTimer = setTimeout(() => { delBtn.classList.remove("confirm"); delBtn.textContent = "🗑 刪除"; }, 3000);
+        confirmTimer = setTimeout(() => { delBtn.classList.remove("confirm"); delBtn.textContent = "刪除"; }, 3000);
         return;
       }
       clearTimeout(confirmTimer);
       delBtn.disabled = true;
       try {
         await api(`/api/notes?id=${encodeURIComponent(row.id)}`, { method: "DELETE" });
-        state.items = state.items.filter(r => r.id !== row.id);
+        state.items = state.items.filter(r => String(r.id) !== String(row.id));
         state.total = Math.max(0, state.total - 1);
-        closeModal();
+        findCardEl(row.id)?.remove();
+        closePanel();
         renderCards(0);
         loadTags();
-        showStatus("已刪除", 1500);
-      } catch (e) { showStatus("❌ " + e.message, 3000); delBtn.disabled = false; }
+        toast("已刪除");
+      } catch (e) { toast(e.message, 3000); delBtn.disabled = false; }
     });
+    rest.push(el("div", { class: "panel-actions" }, [pinBtn, editBtn, delBtn]));
 
-    const toolbar = el("div", { class: "modal-toolbar" }, [pinBtn, editBtn, copyBtn, delBtn]);
-
-    const parts = [header, time, toolbar];
-    if (row.summary) parts.push(el("div", { class: "modal-summary", text: row.summary }));
-    const tags = Array.isArray(row.tags) ? row.tags : [];
-    if (tags.length) parts.push(el("div", { class: "modal-tags" }, tags.map(t => el("span", { text: `#${t}` }))));
-
-    const imgs = (Array.isArray(row.attachments) ? row.attachments : []).filter(a => a?.type === "image");
-    if (imgs.length) {
-      parts.push(el("div", { class: "modal-img-wrapper" },
-        imgs.map(a => el("a", { href: a.url, target: "_blank", rel: "noopener" },
-          [el("img", { class: "modal-img", src: `${a.url}?width=800`, alt: "" })]))));
-    }
-
-    const raw = el("div", { class: "modal-raw" });
-    setLinkified(raw, row.raw_text || "無原始內容");
-    parts.push(raw);
-
-    modalBody.append(...parts);
+    rest.forEach(n => n.classList.add("fade-in"));
+    panelBody.append(el("div", { class: "panel-main" }, [head, ...rest]));
   }
 
-  function renderModalEdit() {
+  function renderPanelEdit() {
     const row = currentRow;
-    modalBody.innerHTML = "";
+    panelBody.innerHTML = "";
 
-    const titleIn = el("input", { type: "text", maxlength: "200" }); titleIn.value = row.title || "";
-    const summaryIn = el("textarea", { maxlength: "2000" }); summaryIn.value = row.summary || "";
-    const tagsIn = el("input", { type: "text" }); tagsIn.value = (Array.isArray(row.tags) ? row.tags : []).join(", ");
+    const titleIn = el("input", { type: "text", maxlength: "200", id: "editTitle" }); titleIn.value = row.title || "";
+    const summaryIn = el("textarea", { maxlength: "2000", id: "editSummary" }); summaryIn.value = row.summary || "";
+    const tagsIn = el("input", { type: "text", id: "editTags" }); tagsIn.value = (Array.isArray(row.tags) ? row.tags : []).join(", ");
 
-    const saveBtn = el("button", { class: "tool-btn primary", text: "儲存" });
-    const cancelBtn = el("button", { class: "tool-btn", text: "取消", onclick: renderModalView });
+    const saveBtn = el("button", { class: "pill pill-ink", type: "submit", text: "儲存" });
+    const cancelBtn = el("button", { class: "pill pill-white", type: "button", text: "取消", onclick: renderPanelView });
 
-    saveBtn.addEventListener("click", async () => {
+    const form = el("form", { class: "edit-form" }, [
+      el("label", { for: "editTitle" }, ["標題", titleIn]),
+      el("label", { for: "editSummary" }, ["摘要", summaryIn]),
+      el("label", { for: "editTags" }, [el("span", {}, ["標籤 ", el("span", { class: "hint", text: "（用逗號或空白分隔）" })]), tagsIn]),
+      el("div", { class: "panel-actions" }, [cancelBtn, saveBtn]),
+    ]);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
       saveBtn.disabled = true;
       const tags = tagsIn.value.split(/[,，、\s]+/).map(s => s.trim().replace(/^#/, "")).filter(Boolean);
       try {
         const { data } = await api(`/api/notes?id=${encodeURIComponent(row.id)}`, {
-          method: "PATCH",
-          body: JSON.stringify({ title: titleIn.value, summary: summaryIn.value, tags }),
+          method: "PATCH", body: JSON.stringify({ title: titleIn.value, summary: summaryIn.value, tags }),
         });
         currentRow = replaceItem(data);
         renderCards(0);
         loadTags();
-        renderModalView();
-        showStatus("已儲存", 1500);
-      } catch (e) { showStatus("❌ " + e.message, 3000); saveBtn.disabled = false; }
+        renderPanelView();
+        toast("已儲存");
+      } catch (err) { toast(err.message, 3000); saveBtn.disabled = false; }
     });
 
-    modalBody.append(
-      el("div", { class: "modal-header-row" }, [el("div", { class: "modal-title", text: "✏️ 編輯記錄" })]),
-      el("div", { class: "edit-form" }, [
-        el("label", {}, ["標題", titleIn]),
-        el("label", {}, ["摘要", summaryIn]),
-        el("label", {}, [el("span", {}, ["標籤 ", el("span", { class: "hint", text: "（用逗號或空白分隔）" })]), tagsIn]),
-      ]),
-      el("div", { class: "modal-toolbar" }, [cancelBtn, saveBtn]),
-    );
+    panelBody.append(el("div", { class: "panel-main" }, [
+      el("div", { class: "panel-head" }, [el("h2", { class: "panel-title", id: "panelTitle", text: "編輯記錄" })]),
+      form,
+    ]));
     titleIn.focus();
+  }
+
+  // 置頂後排序會變：重新載入清單，但保持彈窗開著
+  function reloadKeepPanel() {
+    state.items = []; state.total = 0;
+    loadPage();
   }
 
   /* ========= 啟動 ========= */
