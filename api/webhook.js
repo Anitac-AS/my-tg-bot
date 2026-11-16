@@ -45,6 +45,14 @@ function verifyTelegramSecretToken(req) {
   return typeof got === "string" && got === expected;
 }
 
+// ====== 使用者白名單（ALLOWED_TG_USER_IDS，逗號分隔；未設定則不限制）======
+function isAllowedUser(msg) {
+  const list = (process.env.ALLOWED_TG_USER_IDS || "")
+    .split(",").map(s => s.trim()).filter(Boolean);
+  if (!list.length) return true;
+  return list.includes(String(msg.from?.id ?? ""));
+}
+
 // ====== Helper: 回覆 Telegram ======
 async function replyToTelegram({ chatId, text }) {
   if (!process.env.BOT_TOKEN) return;
@@ -90,7 +98,7 @@ async function handlePhotoUpload(fileId) {
     const { data, error } = await supabase.storage
       .from('assets')
       .upload(fileName, buffer, {
-        contentType: `image/${ext}`,
+        contentType: `image/${ext === "jpg" ? "jpeg" : ext}`,
         upsert: false
       });
 
@@ -118,6 +126,11 @@ export default async function handler(req, res) {
 
     const msg = req.body?.message || req.body?.edited_message;
     if (!msg) return res.status(200).send("OK");
+
+    if (!isAllowedUser(msg)) {
+      console.warn("Blocked user:", msg.from?.id);
+      return res.status(200).send("OK");
+    }
 
     chatId = msg.chat.id;
 

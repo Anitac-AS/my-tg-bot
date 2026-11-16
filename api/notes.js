@@ -1,60 +1,114 @@
 // 檔案：api/notes.js
-import { createClient } from "@supabase/supabase-js";
+// GET    ?q=關鍵字（空白分隔＝AND）&tags=a,b（AND）&type=image|link|text&limit=30&offset=0
+//        → { data: [...], total }
+// PATCH  ?id=123  body: { title?, summary?, tags?, pinned? }  → { data: row }
+// DELETE ?id=123  → { ok: true }（連同 Storage 裡的圖片一起刪）
+import { supabase, STORAGE_BUCKET } from "../lib/supabase.js";
+import { requireAuth } from "../lib/auth.js";
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const TYPES = new Set(["", "image", "link", "text"]);
 
-// Server 端用 service_role，這個檔案只在 Vercel function 上執行，不會外洩
-const supabase = supabaseUrl && supabaseKey
-  ? createClient(supabaseUrl, supabaseKey)
-  : null;
+function getParams(req) {
+  const url = new URL(req.url, `https://${req.headers.host || "localhost"}`);
+  return url.searchParams;
+}
+
+function cleanTags(input) {
+  if (!Array.isArray(input)) return null;
+  const out = [];
+  for (const t of input) {
+    if (typeof t !== "string") continue;
+    const v = t.trim().replace(/^#/, "").slice(0, 30);
+    if (v && !out.includes(v)) out.push(v);
+  }
+  return out.slice(0, 10);
+}
+
+async function handleGet(req, res) {
+  const p = getParams(req);
+  const q = (p.get("q") || "").trim().slice(0, 200);
+  const tagsParam = p.get("tags") || p.get("tag") || "";
+  const tags = tagsParam.split(",").map(s => s.trim()).filter(Boolean).slice(0, 10);
+  const type = TYPES.has(p.get("type") || "") ? (p.get("type") || "") : "";
+  const limit = Math.min(Math.max(parseInt(p.get("limit") || "30", 10) || 30, 1), 100);
+  const offset = Math.max(parseInt(p.get("offset") || "0", 10) || 0, 0);
+
+  const { data, error } = await supabase.rpc("mm_search_notes", {
+    p_q: q, p_tags: tags, p_type: type, p_limit: limit, p_offset: offset,
+  });
+  if (error) {
+    console.error("Search error:", error);
+    return res.status(500).json({ error: "Supabase query error" });
+  }
+  return res.status(200).json({ data: data?.data || [], total: data?.total ?? 0 });
+}
+
+async function handlePatch(req, res, id) {
+  const body = req.body || {};
+  const patch = {};
+  if (typeof body.title === "string") patch.title = body.title.trim().slice(0, 200);
+  if (typeof body.summary === "string") patch.summary = body.summary.trim().slice(0, 2000);
+  if (body.tags !== undefined) {
+    const tags = cleanTags(body.tags);
+    if (!tags) return res.status(400).json({ error: "tags 必須是陣列" });
+    patch.tags = tags;
+  }
+  if (typeof body.pinned === "boolean") patch.pinned = body.pinned;
+  if (!Object.keys(patch).length) return res.status(400).json({ error: "沒有可更新的欄位" });
+
+  const { data, error } = await supabase
+    .from("notes").update(patch).eq("id", id).select().single();
+  if (error) {
+    console.error("Update error:", error);
+    return res.status(500).json({ error: "更新失敗" });
+  }
+  return res.status(200).json({ data });
+}
+
+function storagePathFromUrl(url) {
+  const marker = `/storage/v1/object/public/${STORAGE_BUCKET}/`;
+  const idx = typeof url === "string" ? url.indexOf(marker) : -1;
+  if (idx === -1) return null;
+  return decodeURIComponent(url.slice(idx + marker.length).split("?")[0]);
+}
+
+async function handleDelete(req, res, id) {
+  const { data: row, error: getErr } = await supabase
+    .from("notes").select("attachments").eq("id", id).single();
+  if (getErr) {
+    console.error("Fetch before delete error:", getErr);
+    return res.status(404).json({ error: "找不到這筆記錄" });
+  }
+
+  const { error } = await supabase.from("notes").delete().eq("id", id);
+  if (error) {
+    console.error("Delete error:", error);
+    return res.status(500).json({ error: "刪除失敗" });
+  }
+
+  const paths = (Array.isArray(row?.attachments) ? row.attachments : [])
+    .map(a => storagePathFromUrl(a?.url)).filter(Boolean);
+  if (paths.length) {
+    const { error: stErr } = await supabase.storage.from(STORAGE_BUCKET).remove(paths);
+    if (stErr) console.error("Storage cleanup error:", stErr); // 不影響結果
+  }
+  return res.status(200).json({ ok: true });
+}
 
 export default async function handler(req, res) {
-  if (!supabase) {
-    console.error("Supabase client not initialized");
-    return res.status(500).json({ error: "Supabase not configured" });
-  }
-
-  if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
+  res.setHeader("Cache-Control", "no-store");
+  if (!requireAuth(req, res)) return;
+  if (!supabase) return res.status(500).json({ error: "Supabase not configured" });
 
   try {
-    // 解析 ?q= 關鍵字 & ?tag= 標籤
-    const url = new URL(req.url, `https://${req.headers.host}`);
-    const q   = url.searchParams.get("q")?.trim()   || "";
-    const tag = url.searchParams.get("tag")?.trim() || "";
+    if (req.method === "GET") return await handleGet(req, res);
 
-    let query = supabase
-      .from("notes") // 如果你的表不是叫 notes，這裡改掉
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(50);
+    const id = getParams(req).get("id");
+    if (!id) return res.status(400).json({ error: "缺少 id" });
+    if (req.method === "PATCH") return await handlePatch(req, res, id);
+    if (req.method === "DELETE") return await handleDelete(req, res, id);
 
-    // 用 ilike 搜尋 title / summary / raw_text
-    if (q) {
-      const pattern = `%${q}%`;
-      query = query.or(
-        `title.ilike.${pattern},summary.ilike.${pattern},raw_text.ilike.${pattern}`
-      );
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("Supabase query error:", error);
-      return res.status(500).json({ error: "Supabase query error" });
-    }
-
-    // 👉 在程式裡用 tags 做第二層過濾（真正的「標籤搜尋」）
-    let result = data || [];
-    if (tag) {
-      result = result.filter(row =>
-        Array.isArray(row.tags) && row.tags.includes(tag)
-      );
-    }
-
-    return res.status(200).json({ data: result });
+    return res.status(405).json({ error: "Method Not Allowed" });
   } catch (err) {
     console.error("Notes API error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
