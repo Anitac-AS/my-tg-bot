@@ -30,14 +30,14 @@
     }
 
     * { box-sizing: border-box; }
-    html { -webkit-text-size-adjust: 100%; }
+    html { -webkit-text-size-adjust: 100%; overflow-x: hidden; overflow-x: clip; }
     body {
-      margin: 0;
+      margin: 0; position: relative;
+      overflow-x: clip;
       min-height: 100vh;
       background: var(--cream);
       color: var(--ink);
       font-family: var(--font);
-      overflow-x: hidden;
     }
     button, input, textarea { font: inherit; color: inherit; }
     a { color: var(--ink); }
@@ -46,6 +46,7 @@
     :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
     /* 背景圓 */
+    .bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
     .blob { position: absolute; border-radius: 50%; pointer-events: none; z-index: 0; }
     .blob-a { width: 420px; height: 420px; background: var(--butter); top: -180px; right: -120px; }
     .blob-b { width: 260px; height: 260px; background: var(--mint); top: 140px; left: -140px; }
@@ -157,11 +158,11 @@
 
     /* ===== Cards ===== */
     .cards {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
       gap: 24px; align-items: start;
     }
     .card {
-      position: relative; background: var(--white);
+      position: relative; min-width: 0; background: var(--white);
       border: 2px solid var(--ink); border-radius: 28px; padding: 14px;
       display: flex; flex-direction: column; gap: 12px;
       transition: transform .25s var(--bounce);
@@ -182,11 +183,11 @@
     .card-open::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: 28px; }
     .card-open:focus-visible { outline: none; }
     .card-summary {
-      margin: 0; font-size: 14px; line-height: 1.7; color: var(--ink-2);
+      margin: 0; overflow-wrap: anywhere; font-size: 14px; line-height: 1.7; color: var(--ink-2);
       display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
     }
     .card-snippet {
-      margin: 0; font-size: 13px; line-height: 1.6; color: var(--ink-2);
+      margin: 0; overflow-wrap: anywhere; font-size: 13px; line-height: 1.6; color: var(--ink-2);
       background: var(--cream); border-radius: 12px; padding: 8px 10px;
     }
     .card-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -230,7 +231,8 @@
     .backdrop { position: absolute; inset: 0; background: rgba(30, 58, 47, .35); }
     .panel {
       position: relative; z-index: 1;
-      width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 48px);
+      width: min(620px, 100%);
+      max-height: calc(100vh - 48px); max-height: calc(100dvh - 48px);
       overflow: auto; overscroll-behavior: contain;
       background: var(--white); border: 2px solid var(--ink); border-radius: 36px;
       padding: 16px;
@@ -254,7 +256,7 @@
     .panel-head .pill { white-space: nowrap; flex-shrink: 0; }
     .panel-title { margin: 0; font-weight: 800; font-size: 26px; line-height: 1.3; overflow-wrap: anywhere; }
     .panel-date { font-family: var(--font-latin); font-size: 13px; color: var(--muted); margin-top: 6px; display: block; }
-    .panel-summary { margin: 0; font-size: 15px; line-height: 1.75; background: var(--mint-soft); border-radius: 18px; padding: 14px 16px; }
+    .panel-summary { margin: 0; overflow-wrap: anywhere; font-size: 15px; line-height: 1.75; background: var(--mint-soft); border-radius: 18px; padding: 14px 16px; }
     .panel-tags { display: flex; gap: 6px; flex-wrap: wrap; }
     .panel-tags span { border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 700; transform: rotate(var(--rot, 0deg)); }
     .panel-raw {
@@ -318,7 +320,7 @@
       .home-mark { width: 50px; height: 50px; border-radius: 16px; }
       .search-box { border-radius: 26px; padding: 14px; }
       .search-row .pill { padding: 0 20px; }
-      .cards { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: minmax(0, 1fr); }
       .card:hover { transform: none; }
       .blob-a { width: 300px; height: 300px; top: -150px; right: -120px; }
       .blob-b { display: none; }
@@ -328,14 +330,20 @@
       .panel-close { top: 8px; right: 8px; }
     }
     @media (max-width: 520px) {
+      .overlay { padding: 10px; }
+      .panel { max-height: calc(100vh - 20px); max-height: calc(100dvh - 20px); border-radius: 24px; padding: 10px; }
+      .panel-media { height: 180px; border-radius: 16px; }
+      .panel-title { font-size: 22px; }
       .panel-head { flex-direction: column; align-items: flex-start; gap: 10px; }
       .panel-head > div { width: 100%; }
     }
   </style>
 </head>
 <body>
-  <div class="blob blob-a" aria-hidden="true"></div>
-  <div class="blob blob-b" aria-hidden="true"></div>
+  <div class="bg" aria-hidden="true">
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+  </div>
 
   <!-- 登入 -->
   <div id="loginScreen" class="login-screen">
