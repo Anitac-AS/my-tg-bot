@@ -519,13 +519,126 @@
       h1 { font-size: 24px; }
       .modal-content { width: calc(100vw - 24px); max-width: calc(100vw - 24px); margin: 0 12px; padding: 16px; }
     }    
+
+    /* ===== Phase 1 additions ===== */
+    .header { position: relative; }
+    .header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 8px; }
+    .ghost-btn {
+      border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.12);
+      color: #fff; font-size: 13px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .ghost-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* Filter row */
+    .filter-row {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+      margin-top: 14px;
+    }
+    .type-group { display: inline-flex; background: #f3f4f6; border-radius: 10px; padding: 3px; gap: 2px; }
+    .type-btn {
+      border: none; background: transparent; padding: 6px 12px; font-size: 13px;
+      border-radius: 8px; cursor: pointer; color: #4b5563; transition: all 0.2s;
+    }
+    .type-btn.active { background: #fff; color: #5b21b6; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .active-filters { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .filter-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;
+      border: none; border-radius: 999px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+    }
+    .filter-chip .x { opacity: 0.8; font-size: 14px; line-height: 1; }
+    .filter-chip:hover .x { opacity: 1; }
+    .clear-btn { background: none; border: none; color: #667eea; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .clear-btn:hover { text-decoration: underline; }
+    .result-info { margin-left: auto; font-size: 12px; color: #6b7280; }
+
+    /* Sidebar tag count */
+    .sidebar-tag .cnt { opacity: 0.6; margin-left: 4px; font-size: 11px; }
+    .sidebar-tag.active .cnt { opacity: 0.85; }
+
+    /* Cards */
+    .card.pinned { border: 2px solid #a78bfa; }
+    .pin-badge { font-size: 14px; margin-right: 4px; }
+    mark { background: #fde68a; color: inherit; padding: 0 1px; border-radius: 2px; }
+    .meta-item { display: inline-flex; align-items: center; gap: 3px; }
+
+    .load-more-wrap { grid-column: 1 / -1; text-align: center; padding: 8px 0 24px; }
+    .load-more {
+      border: none; background: rgba(255,255,255,0.9); color: #5b21b6; font-weight: 600;
+      padding: 10px 24px; border-radius: 999px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .load-more:disabled { opacity: 0.6; cursor: default; }
+    #sentinel { height: 1px; }
+
+    /* Modal toolbar & edit */
+    .modal-toolbar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; margin-top: 4px; }
+    .tool-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 6px 12px; font-size: 12px; font-weight: 600; color: #4b5563;
+      background: #fff; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .tool-btn:hover { background: #f3f4f6; color: #111827; border-color: #9ca3af; }
+    .tool-btn.primary { background: #667eea; border-color: #5a67d8; color: #fff; }
+    .tool-btn.primary:hover { background: #5a67d8; }
+    .tool-btn.danger:hover, .tool-btn.danger.confirm { background: #ef4444; border-color: #dc2626; color: #fff; }
+    .tool-btn:disabled { opacity: 0.6; cursor: default; }
+    .modal-summary { font-size: 14px; color: #374151; line-height: 1.6; background: #eef2ff; border-radius: 8px; padding: 10px 12px; }
+    .modal-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .modal-tags span { background: #e0e7ff; color: #5b21b6; border-radius: 6px; padding: 3px 9px; font-size: 12px; font-weight: 600; }
+    .modal-raw a { color: #4f46e5; word-break: break-all; }
+    .edit-form { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+    .edit-form label { font-size: 12px; font-weight: 600; color: #4b5563; display: flex; flex-direction: column; gap: 4px; }
+    .edit-form input, .edit-form textarea {
+      font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff;
+    }
+    .edit-form textarea { min-height: 90px; resize: vertical; }
+    .edit-form input:focus, .edit-form textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); }
+    .hint { font-weight: 400; color: #9ca3af; }
+
+    /* Login */
+    .login-screen {
+      position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 3000;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .login-screen.open { display: flex; }
+    .login-box {
+      background: rgba(255,255,255,0.97); border-radius: 16px; padding: 28px 24px; width: min(340px, calc(100vw - 32px));
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25); display: flex; flex-direction: column; gap: 12px; text-align: center;
+    }
+    .login-box h2 { margin: 0; font-size: 22px; color: #1f2937; }
+    .login-box input { padding: 12px 14px; border-radius: 10px; border: 2px solid #e5e7eb; font-size: 15px; }
+    .login-box input:focus { outline: none; border-color: #667eea; }
+    .login-box button {
+      padding: 12px; border: none; border-radius: 10px; color: #fff; font-weight: 600; font-size: 15px; cursor: pointer;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .login-error { color: #dc2626; font-size: 13px; min-height: 18px; }
+
+    @media (max-width: 768px) {
+      .header-actions { position: static; justify-content: center; margin-top: 10px; }
+      .result-info { margin-left: 0; width: 100%; }
+    }
   </style>
 </head>
 <body>
+  <!-- 登入 -->
+  <div id="loginScreen" class="login-screen">
+    <form id="loginForm" class="login-box">
+      <h2>⭐ Shu's MyMind</h2>
+      <input id="loginPassword" type="password" placeholder="請輸入密碼" autocomplete="current-password" required />
+      <button type="submit" id="loginBtn">登入</button>
+      <div id="loginError" class="login-error"></div>
+    </form>
+  </div>
+
   <div class="container">
     <div class="header">
       <h1>⭐ Shu's MyMind</h1>
       <div class="subtitle">填充、歸納、壯大、使用</div>
+      <div class="header-actions">
+        <button id="logoutBtn" class="ghost-btn" type="button">登出</button>
+      </div>
     </div>
 
     <div class="search-wrapper">
@@ -533,361 +646,538 @@
         <div class="search-input-wrapper">
           <div class="search-icon">
             <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
           </div>
-          <input id="searchInput" type="text" placeholder="搜尋標題、摘要或內容..." />
+          <input id="searchInput" type="search" placeholder="搜尋標題、摘要、內容或標籤…" title="多個關鍵字用空白分隔" />
         </div>
         <button id="searchBtn">
           <span class="btn-text">搜尋</span>
         </button>
       </div>
+      <div class="filter-row">
+        <div class="type-group" id="typeGroup">
+          <button class="type-btn" data-type="">全部</button>
+          <button class="type-btn" data-type="image">🖼 有圖</button>
+          <button class="type-btn" data-type="link">🔗 有連結</button>
+          <button class="type-btn" data-type="text">📝 純文字</button>
+        </div>
+        <div class="active-filters" id="activeFilters"></div>
+        <div class="result-info" id="resultInfo"></div>
+      </div>
     </div>
 
     <div class="layout">
       <aside class="sidebar">
-        <div class="sidebar-title">📂 標籤分類</div>
+        <div class="sidebar-title">📂 標籤分類 <span class="hint">（可複選）</span></div>
         <div id="sidebarTags" class="sidebar-tags"></div>
       </aside>
 
       <main class="main">
         <div id="cards" class="cards"></div>
+        <div id="sentinel"></div>
       </main>
     </div>
   </div>
 
-  <div class="status-bar"><div id="status"></div></div>
+  <div class="status-bar"><div id="status" style="display:none"></div></div>
 
   <div id="rawModal" class="modal">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
-      <button id="modalClose" class="modal-close">&times;</button>
-      
-      <div class="modal-header-row">
-        <div class="modal-title" id="modalTitle"></div>
-      </div>
-      <div class="modal-time" id="modalTime"></div>
-      
-      <div id="modalImages" class="modal-img-wrapper"></div>
-
-      <div class="raw-tools">
-        <button id="copyBtn" class="copy-btn">
-          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
-          </svg>
-          複製內容
-        </button>
-      </div>
-
-      <div class="modal-raw" id="modalRaw"></div>
+      <button id="modalClose" class="modal-close" aria-label="關閉">&times;</button>
+      <div id="modalBody" style="display:flex;flex-direction:column;gap:8px;min-height:0;flex:1;"></div>
     </div>
   </div>
 
 <script>
-  const searchInput = document.getElementById("searchInput");
-  const searchBtn = document.getElementById("searchBtn");
-  const cardsEl = document.getElementById("cards");
-  const statusEl = document.getElementById("status");
-  const sidebarTagsEl = document.getElementById("sidebarTags");
-
-  const rawModal = document.getElementById("rawModal");
-  const modalTitle = document.getElementById("modalTitle");
-  const modalTime = document.getElementById("modalTime");
-  const modalRaw = document.getElementById("modalRaw");
-  const modalImages = document.getElementById("modalImages");
-  const modalClose = document.getElementById("modalClose");
-  const copyBtn = document.getElementById("copyBtn");
+  /* ========= DOM ========= */
+  const $ = (id) => document.getElementById(id);
+  const searchInput = $("searchInput");
+  const searchBtn = $("searchBtn");
+  const cardsEl = $("cards");
+  const statusEl = $("status");
+  const sidebarTagsEl = $("sidebarTags");
+  const activeFiltersEl = $("activeFilters");
+  const resultInfoEl = $("resultInfo");
+  const typeGroupEl = $("typeGroup");
+  const sentinelEl = $("sentinel");
+  const rawModal = $("rawModal");
+  const modalBody = $("modalBody");
 
   const SYSTEM_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
-  let activeTag = "";    
-  let currentQuery = ""; 
-  let currentRawText = ""; // 暫存當前開啟的文字供複製用
+  const PAGE_SIZE = 30;
+  const TOP_TAGS = 10;
+  const URL_RE = /(https?:\/\/[^\s<>"'）)】]+)/g;
 
-  /* ========= 一鍵複製功能 ========= */
-  copyBtn.addEventListener("click", () => {
-    if (!currentRawText) return;
-    
-    navigator.clipboard.writeText(currentRawText).then(() => {
-      // 視覺回饋
-      const originalHtml = copyBtn.innerHTML;
-      copyBtn.classList.add("copied");
-      copyBtn.innerHTML = `
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-        </svg> 已複製
-      `;
-      
-      // 2秒後復原
-      setTimeout(() => {
-        copyBtn.classList.remove("copied");
-        copyBtn.innerHTML = originalHtml;
-      }, 2000);
-    }).catch(err => {
-      console.error('複製失敗:', err);
-      statusEl.textContent = "❌ 複製失敗";
-      statusEl.style.display = 'block';
-    });
-  });
+  /* ========= 狀態 ========= */
+  const state = { q: "", tags: [], type: "", items: [], total: 0, loading: false, reqId: 0 };
+  let tagCounts = [];
+  let tagsExpanded = false;
+  let currentRow = null;
 
-  /* ========= Modal ========= */
-  function openRawModal(row) {
-    modalTitle.textContent = row.title || "📝 無標題記錄";
-    
-    // 設定全域變數供複製使用
-    currentRawText = row.raw_text || "";
-    modalRaw.textContent = currentRawText || "無原始內容";
-
-    const created = row.created_at
-      ? new Date(row.created_at).toLocaleString("zh-TW", {
-          year: "numeric", month: "2-digit", day: "2-digit",
-          hour: "2-digit", minute: "2-digit",
-        })
-      : "";
-    modalTime.textContent = created ? `建立時間：${created}` : "";
-
-    // 渲染圖片
-    modalImages.innerHTML = "";
-    if (row.attachments && Array.isArray(row.attachments)) {
-      row.attachments.forEach(att => {
-        if (att.type === 'image') {
-          const img = document.createElement("img");
-          img.className = "modal-img";
-          img.src = `${att.url}?width=800`; 
-          modalImages.appendChild(img);
-        }
-      });
+  /* ========= 小工具 ========= */
+  function el(tag, props = {}, children = []) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === "class") node.className = v;
+      else if (k === "text") node.textContent = v;
+      else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
+      else node.setAttribute(k, v);
     }
-
-    rawModal.classList.add("open");
+    for (const c of [].concat(children)) if (c != null) node.append(c);
+    return node;
   }
 
-  function closeRawModal() {
-    rawModal.classList.remove("open");
+  function showStatus(text, autoHideMs = 0) {
+    statusEl.textContent = text;
+    statusEl.style.display = text ? "block" : "none";
+    if (autoHideMs) setTimeout(() => { if (statusEl.textContent === text) statusEl.style.display = "none"; }, autoHideMs);
   }
-  modalClose.addEventListener("click", closeRawModal);
-  rawModal.addEventListener("click", (e) => {
-    if (e.target === rawModal || e.target.classList.contains("modal-backdrop")) closeRawModal();
+
+  function fmtTime(iso) {
+    return iso ? new Date(iso).toLocaleString("zh-TW", {
+      year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+    }) : "";
+  }
+
+  function hasImage(row) { return Array.isArray(row.attachments) && row.attachments.some(a => a?.type === "image"); }
+  function hasLink(row) { return /https?:\/\//i.test(row.raw_text || ""); }
+
+  function searchTerms() { return state.q.split(/\s+/).filter(Boolean); }
+
+  // 把 text 放進 node，關鍵字用 <mark> 標示（不使用 innerHTML，避免 XSS）
+  function setHighlighted(node, text) {
+    node.textContent = "";
+    const terms = searchTerms();
+    if (!terms.length || !text) { node.textContent = text || ""; return; }
+    const re = new RegExp(`(${terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+    text.split(re).forEach((part, i) => {
+      node.append(i % 2 ? el("mark", { text: part }) : document.createTextNode(part));
+    });
+  }
+
+  function setLinkified(node, text) {
+    node.textContent = "";
+    (text || "").split(URL_RE).forEach((part, i) => {
+      node.append(i % 2
+        ? el("a", { href: part, target: "_blank", rel: "noopener noreferrer", text: part })
+        : document.createTextNode(part));
+    });
+  }
+
+  /* ========= API ========= */
+  async function api(path, opts = {}) {
+    const res = await fetch(path, {
+      ...opts,
+      headers: { "Content-Type": "application/json", ...(opts.headers || {}) },
+      credentials: "same-origin",
+    });
+    if (res.status === 401 && path !== "/api/session") { showLogin(); throw new Error("unauthorized"); }
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+    return json;
+  }
+
+  /* ========= 登入 ========= */
+  function showLogin() {
+    $("loginScreen").classList.add("open");
+    setTimeout(() => $("loginPassword").focus(), 50);
+  }
+
+  $("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("loginBtn");
+    btn.disabled = true; $("loginError").textContent = "";
+    try {
+      await api("/api/session", { method: "POST", body: JSON.stringify({ password: $("loginPassword").value }) });
+      $("loginScreen").classList.remove("open");
+      $("loginPassword").value = "";
+      start();
+    } catch (err) {
+      $("loginError").textContent = err.message || "登入失敗";
+    }
+    btn.disabled = false;
   });
 
-  /* ========= Sidebar 標籤邏輯 (Top 5 + Collapse) ========= */
-  function buildSidebarTags(rows) {
-    const tagCounts = new Map();
-    rows.forEach((row) => {
-      const tags = Array.isArray(row.tags) ? row.tags : [];
-      tags.forEach((t) => tagCounts.set(t, (tagCounts.get(t) || 0) + 1));
+  $("logoutBtn").addEventListener("click", async () => {
+    await api("/api/session", { method: "DELETE" }).catch(() => {});
+    cardsEl.innerHTML = ""; sidebarTagsEl.innerHTML = "";
+    showLogin();
+  });
+
+  /* ========= URL 狀態 ========= */
+  function readUrl() {
+    const p = new URLSearchParams(location.search);
+    state.q = p.get("q") || "";
+    state.tags = (p.get("tags") || "").split(",").map(s => s.trim()).filter(Boolean);
+    state.type = p.get("type") || "";
+  }
+
+  function writeUrl(push) {
+    const p = new URLSearchParams();
+    if (state.q) p.set("q", state.q);
+    if (state.tags.length) p.set("tags", state.tags.join(","));
+    if (state.type) p.set("type", state.type);
+    const url = p.toString() ? `?${p}` : location.pathname;
+    if (url === location.search || (!p.toString() && !location.search)) return;
+    history[push ? "pushState" : "replaceState"](null, "", url);
+  }
+
+  window.addEventListener("popstate", () => { readUrl(); search(false); });
+
+  /* ========= 篩選 UI ========= */
+  function renderFilters() {
+    searchInput.value = state.q;
+    typeGroupEl.querySelectorAll(".type-btn").forEach(b => b.classList.toggle("active", b.dataset.type === state.type));
+
+    activeFiltersEl.innerHTML = "";
+    state.tags.forEach(t => {
+      activeFiltersEl.append(el("button", {
+        class: "filter-chip", title: "移除這個標籤",
+        onclick: () => toggleTag(t),
+      }, [`#${t}`, el("span", { class: "x", text: "×" })]));
     });
-
-    sidebarTagsEl.innerHTML = "";
-
-    // 1. 全部按鈕
-    const topGroup = document.createElement("div");
-    topGroup.className = "tags-group";
-    
-    const allBtn = document.createElement("button");
-    allBtn.className = "sidebar-tag";
-    allBtn.textContent = "全部";
-    if (!activeTag && !currentQuery) allBtn.classList.add("active");
-    allBtn.addEventListener("click", () => {
-      activeTag = ""; currentQuery = ""; searchInput.value = "";
-      loadNotes("", "");
-    });
-    topGroup.appendChild(allBtn);
-
-    // 2. 排序標籤
-    const sortedTags = Array.from(tagCounts.entries()).sort(
-      ([tagA, countA], [tagB, countB]) => {
-        if (countA !== countB) return countB - countA;
-        return tagA.localeCompare(tagB, "zh-Hant");
-      }
-    );
-
-    // 3. 分割：前5個 vs 剩餘
-    const topTags = sortedTags.slice(0, 5);
-    const hiddenTags = sortedTags.slice(5);
-
-    // 渲染 Top 5
-    topTags.forEach(([tag]) => {
-      const btn = createTagBtn(tag);
-      topGroup.appendChild(btn);
-    });
-    sidebarTagsEl.appendChild(topGroup);
-
-    // 4. 處理剩餘標籤 (如果有)
-    if (hiddenTags.length > 0) {
-      // 更多...按鈕
-      const toggleBtn = document.createElement("button");
-      toggleBtn.className = "sidebar-toggle-btn";
-      toggleBtn.textContent = `查看更多 (${hiddenTags.length})`;
-      
-      // 隱藏區塊
-      const hiddenArea = document.createElement("div");
-      hiddenArea.className = "tags-hidden-area";
-      
-      hiddenTags.forEach(([tag]) => {
-        const btn = createTagBtn(tag);
-        hiddenArea.appendChild(btn);
-      });
-
-      // 切換邏輯
-      toggleBtn.addEventListener("click", () => {
-        const isHidden = !hiddenArea.classList.contains("show");
-        if (isHidden) {
-          hiddenArea.classList.add("show");
-          toggleBtn.textContent = "收起標籤";
-        } else {
-          hiddenArea.classList.remove("show");
-          toggleBtn.textContent = `查看更多 (${hiddenTags.length})`;
-        }
-      });
-
-      sidebarTagsEl.appendChild(hiddenArea);
-      sidebarTagsEl.appendChild(toggleBtn);
-      
-      // 若目前 activeTag 在隱藏區，自動展開
-      const activeInHidden = hiddenTags.some(([t]) => t === activeTag);
-      if (activeInHidden) {
-        hiddenArea.classList.add("show");
-        toggleBtn.textContent = "收起標籤";
-      }
+    if (state.q || state.tags.length || state.type) {
+      activeFiltersEl.append(el("button", { class: "clear-btn", text: "清除全部", onclick: clearAll }));
     }
   }
 
-  function createTagBtn(tag) {
-    const btn = document.createElement("button");
-    btn.className = "sidebar-tag";
-    btn.textContent = tag;
-    if (activeTag === tag) btn.classList.add("active");
-    btn.addEventListener("click", () => {
-      if (activeTag === tag) {
-        activeTag = ""; currentQuery = ""; searchInput.value = ""; loadNotes("", "");
-      } else {
-        activeTag = tag; currentQuery = ""; searchInput.value = tag; loadNotes("", tag);
-      }
-    });
+  function toggleTag(tag) {
+    state.tags = state.tags.includes(tag) ? state.tags.filter(t => t !== tag) : [...state.tags, tag];
+    search(true);
+  }
+
+  function clearAll() {
+    state.q = ""; state.tags = []; state.type = "";
+    search(true);
+  }
+
+  typeGroupEl.addEventListener("click", (e) => {
+    const btn = e.target.closest(".type-btn");
+    if (!btn) return;
+    state.type = btn.dataset.type;
+    search(true);
+  });
+
+  function runKeywordSearch() { state.q = searchInput.value.trim(); search(true); }
+  searchBtn.addEventListener("click", runKeywordSearch);
+  searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") runKeywordSearch(); });
+
+  /* ========= 側欄標籤（全庫統計） ========= */
+  async function loadTags() {
+    try {
+      const json = await api("/api/tags");
+      tagCounts = json.data || [];
+    } catch (e) { if (e.message !== "unauthorized") console.error(e); }
+    renderSidebar();
+  }
+
+  function tagBtn(tag, count) {
+    const btn = el("button", {
+      class: "sidebar-tag" + (state.tags.includes(tag) ? " active" : ""),
+      onclick: () => toggleTag(tag),
+    }, [tag, count != null ? el("span", { class: "cnt", text: count }) : null]);
     return btn;
   }
 
-  /* ========= 主資料載入 ========= */
-  async function loadNotes(q = "", tag = "") {
-    currentQuery = q;
-    searchBtn.disabled = true;
-    searchBtn.innerHTML = '<span class="spinner"></span>';
-    statusEl.textContent = q || tag ? "搜尋中..." : "載入中...";
-    statusEl.style.display = "block";
-    cardsEl.innerHTML = "";
+  function renderSidebar() {
+    sidebarTagsEl.innerHTML = "";
+    const top = el("div", { class: "tags-group" });
+    top.append(el("button", {
+      class: "sidebar-tag" + (!state.tags.length ? " active" : ""),
+      text: "全部",
+      onclick: () => { state.tags = []; search(true); },
+    }));
 
-    const params = new URLSearchParams();
-    if (q) params.set("q", q);
-    if (tag) params.set("tag", tag);
-    const url = params.toString() ? `/api/notes?${params.toString()}` : "/api/notes";
+    // 已選但不在統計中的標籤也顯示（例如網址帶進來的）
+    const known = new Set(tagCounts.map(t => t.tag));
+    const list = [...tagCounts, ...state.tags.filter(t => !known.has(t)).map(t => ({ tag: t, count: 0 }))];
 
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("API Error");
-      const json = await res.json();
-      const data = json.data || [];
+    list.slice(0, TOP_TAGS).forEach(({ tag, count }) => top.append(tagBtn(tag, count)));
+    sidebarTagsEl.append(top);
 
-      buildSidebarTags(data);
-
-      if (!data.length) {
-        statusEl.textContent = (q || tag) ? "🔍 無符合結果" : "📭 暫無記錄";
-        cardsEl.innerHTML = '<div class="empty">試著新增一些對話記錄吧！</div>';
-        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
-        searchBtn.disabled = false;
-        return;
-      }
-
-      statusEl.textContent = `共 ${data.length} 筆`;
-      cardsEl.innerHTML = "";
-
-      data.forEach((row, index) => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.style.animationDelay = `${index * 0.05}s`;
-        
-        card.addEventListener("click", (e) => {
-          if (e.target.closest(".card-tags span")) return;
-          openRawModal(row);
-        });
-
-        // Image
-        if (row.attachments && Array.isArray(row.attachments) && row.attachments.length > 0) {
-          const firstImg = row.attachments.find(a => a.type === 'image');
-          if (firstImg) {
-            const imgEl = document.createElement("img");
-            imgEl.className = "card-img";
-            imgEl.src = `${firstImg.url}?width=400`; 
-            imgEl.loading = "lazy";
-            card.appendChild(imgEl);
-          }
-        }
-
-        const title = document.createElement("div");
-        title.className = "card-title";
-        title.textContent = row.title || "📝 無標題記錄";
-
-        const summary = document.createElement("div");
-        summary.className = "card-summary";
-        summary.textContent = row.summary || "暫無摘要內容";
-
-        const tagsDiv = document.createElement("div");
-        tagsDiv.className = "card-tags";
-        const tags = Array.isArray(row.tags) ? row.tags : [];
-        tags.forEach((t) => {
-          const span = document.createElement("span");
-          const isSystem = SYSTEM_TAGS.includes(t);
-          span.style.background = isSystem ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)" : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
-          span.style.color = isSystem ? "#5b21b6" : "#374151";
-          span.textContent = `#${t}`;
-          span.addEventListener("click", (e) => {
-            e.stopPropagation(); 
-            if (activeTag === t) {
-              activeTag = ""; currentQuery = ""; searchInput.value = ""; loadNotes("", "");
-            } else {
-              activeTag = t; currentQuery = ""; searchInput.value = t; loadNotes("", t);
-            }
-          });
-          tagsDiv.appendChild(span);
-        });
-
-        const meta = document.createElement("div");
-        meta.className = "card-meta";
-        const created = row.created_at ? new Date(row.created_at).toLocaleString("zh-TW", {
-           year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"
-        }) : "";
-        meta.innerHTML = `<span class="meta-item">🕐 ${created}</span>`;
-
-        const raw = document.createElement("div");
-        raw.className = "card-raw";
-        raw.textContent = row.raw_text || "無原始內容";
-
-        card.appendChild(title);
-        card.appendChild(summary);
-        if (tagsDiv.childNodes.length) card.appendChild(tagsDiv);
-        card.appendChild(meta);
-        card.appendChild(raw);
-        cardsEl.appendChild(card);
+    const rest = list.slice(TOP_TAGS);
+    if (rest.length) {
+      const activeInRest = rest.some(r => state.tags.includes(r.tag));
+      const open = tagsExpanded || activeInRest;
+      const hidden = el("div", { class: "tags-hidden-area" + (open ? " show" : "") });
+      rest.forEach(({ tag, count }) => hidden.append(tagBtn(tag, count)));
+      const toggle = el("button", {
+        class: "sidebar-toggle-btn",
+        text: open ? "收起標籤" : `查看更多 (${rest.length})`,
+        onclick: () => { tagsExpanded = !open; renderSidebar(); },
       });
-    } catch (error) {
-      console.error(error);
-      statusEl.textContent = "❌ 載入錯誤";
-      cardsEl.innerHTML = '<div class="empty">發生錯誤，請檢查網路連線</div>';
+      sidebarTagsEl.append(hidden, toggle);
     }
-    searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
-    searchBtn.disabled = false;
   }
 
-  loadNotes("", "");
+  /* ========= 卡片 ========= */
+  function buildCard(row, index) {
+    const card = el("div", { class: "card" + (row.pinned ? " pinned" : "") });
+    card.style.animationDelay = `${(index % PAGE_SIZE) * 0.03}s`;
+    card.addEventListener("click", () => openModal(row));
 
-  searchBtn.addEventListener("click", () => {
-    activeTag = ""; const q = searchInput.value.trim(); loadNotes(q, "");
-  });
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      activeTag = ""; const q = searchInput.value.trim(); loadNotes(q, "");
+    const img = Array.isArray(row.attachments) && row.attachments.find(a => a?.type === "image");
+    if (img) card.append(el("img", { class: "card-img", src: `${img.url}?width=400`, loading: "lazy", alt: "" }));
+
+    const title = el("div", { class: "card-title" });
+    if (row.pinned) title.append(el("span", { class: "pin-badge", text: "📌", title: "已置頂" }));
+    const titleText = el("span");
+    setHighlighted(titleText, row.title || "📝 無標題記錄");
+    title.append(titleText);
+
+    const summary = el("div", { class: "card-summary" });
+    setHighlighted(summary, row.summary || "暫無摘要內容");
+
+    const tagsDiv = el("div", { class: "card-tags" });
+    (Array.isArray(row.tags) ? row.tags : []).forEach(t => {
+      const isSystem = SYSTEM_TAGS.includes(t);
+      const active = state.tags.includes(t);
+      const span = el("span", { text: `#${t}`, title: active ? "取消這個標籤" : "加入標籤篩選" });
+      span.style.background = active
+        ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+        : isSystem ? "linear-gradient(135deg, #e0e7ff 0%, #ddd6fe 100%)" : "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)";
+      span.style.color = active ? "#fff" : isSystem ? "#5b21b6" : "#374151";
+      span.addEventListener("click", (e) => { e.stopPropagation(); toggleTag(t); });
+      tagsDiv.append(span);
+    });
+
+    const meta = el("div", { class: "card-meta" }, [
+      el("span", { class: "meta-item", text: `🕐 ${fmtTime(row.created_at)}` }),
+      hasImage(row) ? el("span", { class: "meta-item", text: "🖼" }) : null,
+      hasLink(row) ? el("span", { class: "meta-item", text: "🔗" }) : null,
+    ]);
+
+    const raw = el("div", { class: "card-raw" });
+    setHighlighted(raw, row.raw_text || "無原始內容");
+
+    card.append(title, summary);
+    if (tagsDiv.childNodes.length) card.append(tagsDiv);
+    card.append(meta, raw);
+    return card;
+  }
+
+  function renderCards(fromIndex = 0) {
+    if (fromIndex === 0) cardsEl.innerHTML = "";
+    cardsEl.querySelector(".load-more-wrap")?.remove();
+
+    if (!state.items.length) {
+      const filtered = state.q || state.tags.length || state.type;
+      cardsEl.innerHTML = "";
+      cardsEl.append(el("div", { class: "empty", style: "grid-column:1/-1",
+        text: filtered ? "🔍 沒有符合的記錄，試試減少篩選條件" : "📭 暫無記錄，從 Telegram 傳點東西進來吧！" }));
+    } else {
+      state.items.slice(fromIndex).forEach((row, i) => cardsEl.append(buildCard(row, fromIndex + i)));
+      if (state.items.length < state.total) {
+        cardsEl.append(el("div", { class: "load-more-wrap" }, [
+          el("button", { class: "load-more", text: `載入更多（還有 ${state.total - state.items.length} 筆）`, onclick: loadPage }),
+        ]));
+      }
     }
-  });
+    resultInfoEl.textContent = state.items.length ? `共 ${state.total} 筆` : "";
+  }
+
+  /* ========= 資料載入 ========= */
+  function search(push) {
+    state.items = []; state.total = 0;
+    writeUrl(push);
+    renderFilters();
+    renderSidebar();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    loadPage();
+  }
+
+  async function loadPage() {
+    if (state.loading && state.items.length) return;
+    const myReq = ++state.reqId;
+    state.loading = true;
+    const first = state.items.length === 0;
+    if (first) { searchBtn.disabled = true; searchBtn.innerHTML = '<span class="spinner"></span>'; }
+    showStatus(first ? (state.q || state.tags.length || state.type ? "搜尋中..." : "載入中...") : "載入更多...");
+
+    const p = new URLSearchParams({ limit: PAGE_SIZE, offset: state.items.length });
+    if (state.q) p.set("q", state.q);
+    if (state.tags.length) p.set("tags", state.tags.join(","));
+    if (state.type) p.set("type", state.type);
+
+    try {
+      const json = await api(`/api/notes?${p}`);
+      if (myReq !== state.reqId) return; // 已有更新的請求
+      const from = state.items.length;
+      state.items.push(...(json.data || []));
+      state.total = json.total || 0;
+      renderCards(from);
+      showStatus("");
+    } catch (err) {
+      if (myReq !== state.reqId || err.message === "unauthorized") return;
+      console.error(err);
+      showStatus("❌ 載入錯誤：" + err.message, 4000);
+    } finally {
+      if (myReq === state.reqId) {
+        state.loading = false;
+        searchBtn.innerHTML = '<span class="btn-text">搜尋</span>';
+        searchBtn.disabled = false;
+      }
+    }
+  }
+
+  // 捲到底自動載入下一頁
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !state.loading && state.items.length && state.items.length < state.total) loadPage();
+  }, { rootMargin: "400px" }).observe(sentinelEl);
+
+  /* ========= Modal ========= */
+  function openModal(row) {
+    currentRow = row;
+    renderModalView();
+    rawModal.classList.add("open");
+  }
+
+  function closeModal() {
+    rawModal.classList.remove("open");
+    currentRow = null;
+  }
+
+  $("modalClose").addEventListener("click", closeModal);
+  rawModal.addEventListener("click", (e) => { if (e.target.classList.contains("modal-backdrop")) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && rawModal.classList.contains("open")) closeModal(); });
+
+  function replaceItem(updated) {
+    const i = state.items.findIndex(r => r.id === updated.id);
+    if (i !== -1) state.items[i] = { ...state.items[i], ...updated };
+    return i !== -1 ? state.items[i] : updated;
+  }
+
+  function renderModalView() {
+    const row = currentRow;
+    modalBody.innerHTML = "";
+
+    const title = el("div", { class: "modal-title" }, [row.pinned ? "📌 " : "", row.title || "📝 無標題記錄"]);
+    const header = el("div", { class: "modal-header-row" }, [title]);
+    const time = el("div", { class: "modal-time", text: row.created_at ? `建立時間：${fmtTime(row.created_at)}` : "" });
+
+    const pinBtn = el("button", { class: "tool-btn", text: row.pinned ? "📌 取消置頂" : "📌 置頂" });
+    pinBtn.addEventListener("click", async () => {
+      pinBtn.disabled = true;
+      try {
+        const { data } = await api(`/api/notes?id=${encodeURIComponent(row.id)}`, {
+          method: "PATCH", body: JSON.stringify({ pinned: !row.pinned }),
+        });
+        currentRow = replaceItem(data);
+        renderModalView();
+        search(false); // 置頂會改變排序，重新載入
+        showStatus(data.pinned ? "已置頂" : "已取消置頂", 1500);
+      } catch (e) { showStatus("❌ " + e.message, 3000); pinBtn.disabled = false; }
+    });
+
+    const editBtn = el("button", { class: "tool-btn", text: "✏️ 編輯", onclick: renderModalEdit });
+
+    const copyBtn = el("button", { class: "tool-btn", text: "📋 複製內容" });
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(row.raw_text || "").then(() => {
+        copyBtn.textContent = "✓ 已複製";
+        setTimeout(() => { copyBtn.textContent = "📋 複製內容"; }, 2000);
+      }).catch(() => showStatus("❌ 複製失敗", 2000));
+    });
+
+    const delBtn = el("button", { class: "tool-btn danger", text: "🗑 刪除" });
+    let confirmTimer;
+    delBtn.addEventListener("click", async () => {
+      if (!delBtn.classList.contains("confirm")) {
+        delBtn.classList.add("confirm"); delBtn.textContent = "確定刪除？";
+        confirmTimer = setTimeout(() => { delBtn.classList.remove("confirm"); delBtn.textContent = "🗑 刪除"; }, 3000);
+        return;
+      }
+      clearTimeout(confirmTimer);
+      delBtn.disabled = true;
+      try {
+        await api(`/api/notes?id=${encodeURIComponent(row.id)}`, { method: "DELETE" });
+        state.items = state.items.filter(r => r.id !== row.id);
+        state.total = Math.max(0, state.total - 1);
+        closeModal();
+        renderCards(0);
+        loadTags();
+        showStatus("已刪除", 1500);
+      } catch (e) { showStatus("❌ " + e.message, 3000); delBtn.disabled = false; }
+    });
+
+    const toolbar = el("div", { class: "modal-toolbar" }, [pinBtn, editBtn, copyBtn, delBtn]);
+
+    const parts = [header, time, toolbar];
+    if (row.summary) parts.push(el("div", { class: "modal-summary", text: row.summary }));
+    const tags = Array.isArray(row.tags) ? row.tags : [];
+    if (tags.length) parts.push(el("div", { class: "modal-tags" }, tags.map(t => el("span", { text: `#${t}` }))));
+
+    const imgs = (Array.isArray(row.attachments) ? row.attachments : []).filter(a => a?.type === "image");
+    if (imgs.length) {
+      parts.push(el("div", { class: "modal-img-wrapper" },
+        imgs.map(a => el("a", { href: a.url, target: "_blank", rel: "noopener" },
+          [el("img", { class: "modal-img", src: `${a.url}?width=800`, alt: "" })]))));
+    }
+
+    const raw = el("div", { class: "modal-raw" });
+    setLinkified(raw, row.raw_text || "無原始內容");
+    parts.push(raw);
+
+    modalBody.append(...parts);
+  }
+
+  function renderModalEdit() {
+    const row = currentRow;
+    modalBody.innerHTML = "";
+
+    const titleIn = el("input", { type: "text", maxlength: "200" }); titleIn.value = row.title || "";
+    const summaryIn = el("textarea", { maxlength: "2000" }); summaryIn.value = row.summary || "";
+    const tagsIn = el("input", { type: "text" }); tagsIn.value = (Array.isArray(row.tags) ? row.tags : []).join(", ");
+
+    const saveBtn = el("button", { class: "tool-btn primary", text: "儲存" });
+    const cancelBtn = el("button", { class: "tool-btn", text: "取消", onclick: renderModalView });
+
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      const tags = tagsIn.value.split(/[,，、\s]+/).map(s => s.trim().replace(/^#/, "")).filter(Boolean);
+      try {
+        const { data } = await api(`/api/notes?id=${encodeURIComponent(row.id)}`, {
+          method: "PATCH",
+          body: JSON.stringify({ title: titleIn.value, summary: summaryIn.value, tags }),
+        });
+        currentRow = replaceItem(data);
+        renderCards(0);
+        loadTags();
+        renderModalView();
+        showStatus("已儲存", 1500);
+      } catch (e) { showStatus("❌ " + e.message, 3000); saveBtn.disabled = false; }
+    });
+
+    modalBody.append(
+      el("div", { class: "modal-header-row" }, [el("div", { class: "modal-title", text: "✏️ 編輯記錄" })]),
+      el("div", { class: "edit-form" }, [
+        el("label", {}, ["標題", titleIn]),
+        el("label", {}, ["摘要", summaryIn]),
+        el("label", {}, [el("span", {}, ["標籤 ", el("span", { class: "hint", text: "（用逗號或空白分隔）" })]), tagsIn]),
+      ]),
+      el("div", { class: "modal-toolbar" }, [cancelBtn, saveBtn]),
+    );
+    titleIn.focus();
+  }
+
+  /* ========= 啟動 ========= */
+  function start() {
+    readUrl();
+    renderFilters();
+    loadTags();
+    search(false);
+  }
+
+  (async () => {
+    try {
+      const s = await api("/api/session");
+      if (!s.authed) { showLogin(); if (!s.configured) $("loginError").textContent = "伺服器尚未設定 APP_PASSWORD"; return; }
+      start();
+    } catch { showLogin(); }
+  })();
 </script>
 </body>
 </html>
