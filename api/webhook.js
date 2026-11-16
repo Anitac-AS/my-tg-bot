@@ -1,6 +1,7 @@
 // 檔案：api/webhook.js
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
+import { isEmbeddingConfigured, embedText, noteText, toPgVector } from "../lib/embedding.js";
 
 // ====== Gemini 設定 ======
 const MODEL_NAME = "gemini-2.5-flash";
@@ -71,6 +72,17 @@ function verifyTelegramSecretToken(req) {
   if (!expected) return true;
   const got = req.headers["x-telegram-bot-api-secret-token"];
   return typeof got === "string" && got === expected;
+}
+
+// ====== 語意索引（失敗不影響存檔，之後可在網頁補建）======
+async function makeEmbedding(row) {
+  if (!isEmbeddingConfigured()) return null;
+  try {
+    return toPgVector(await embedText(noteText(row), "RETRIEVAL_DOCUMENT"));
+  } catch (e) {
+    console.error("Embedding failed:", e.message || e);
+    return null;
+  }
 }
 
 // ====== 使用者白名單（ALLOWED_TG_USER_IDS，逗號分隔；未設定則不限制）======
@@ -228,6 +240,7 @@ export default async function handler(req, res) {
           raw_text: messageText,
           attachments: attachments,
           created_at: new Date().toISOString(),
+          embedding: await makeEmbedding({ ...parsed, raw_text: messageText }),
         });
 
       if (dbError) console.error("DB Insert Error:", dbError);

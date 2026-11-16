@@ -5,6 +5,7 @@
 // DELETE ?id=123  → { ok: true }（連同 Storage 裡的圖片一起刪）
 import { supabase, STORAGE_BUCKET } from "../lib/supabase.js";
 import { requireAuth } from "../lib/auth.js";
+import { isEmbeddingConfigured, embedText, noteText, toPgVector } from "../lib/embedding.js";
 
 const TYPES = new Set(["", "image", "link", "text"]);
 
@@ -32,6 +33,21 @@ async function handleGet(req, res) {
   const type = TYPES.has(p.get("type") || "") ? (p.get("type") || "") : "";
   const limit = Math.min(Math.max(parseInt(p.get("limit") || "30", 10) || 30, 1), 100);
   const offset = Math.max(parseInt(p.get("offset") || "0", 10) || 0, 0);
+
+  // 有關鍵字時：語意＋關鍵字混合搜尋；向量服務失敗就退回純關鍵字
+  if (q && isEmbeddingConfigured()) {
+    try {
+      const vec = await embedText(q, "RETRIEVAL_QUERY");
+      const { data, error } = await supabase.rpc("mm_hybrid_search", {
+        p_q: q, p_embedding: toPgVector(vec), p_tags: tags, p_type: type, p_limit: limit, p_offset: offset,
+        p_min_similarity: Number(process.env.SEMANTIC_MIN_SIMILARITY) || 0.6,
+      });
+      if (error) throw error;
+      return res.status(200).json({ data: data?.data || [], total: data?.total ?? 0, mode: "hybrid" });
+    } catch (err) {
+      console.error("Hybrid search failed, falling back to keyword:", err.message || err);
+    }
+  }
 
   const { data, error } = await supabase.rpc("mm_search_notes", {
     p_q: q, p_tags: tags, p_type: type, p_limit: limit, p_offset: offset,
@@ -62,6 +78,19 @@ async function handlePatch(req, res, id) {
     console.error("Update error:", error);
     return res.status(500).json({ error: "更新失敗" });
   }
+
+  // 內容有變就重算向量（失敗不影響這次更新）
+  if ((patch.title !== undefined || patch.summary !== undefined || patch.tags !== undefined) && isEmbeddingConfigured()) {
+    try {
+      const vec = await embedText(noteText(data), "RETRIEVAL_DOCUMENT");
+      const { error: embErr } = await supabase.from("notes").update({ embedding: toPgVector(vec) }).eq("id", id);
+      if (embErr) throw embErr;
+    } catch (err) {
+      console.error("Re-embed failed:", err.message || err);
+    }
+  }
+
+  if (data) delete data.embedding;
   return res.status(200).json({ data });
 }
 
