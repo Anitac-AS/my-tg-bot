@@ -187,6 +187,34 @@
       margin: 0; overflow-wrap: anywhere; font-size: 14px; line-height: 1.7; color: var(--ink-2);
       display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
     }
+    .sem-badge {
+      align-self: flex-start; display: inline-flex; align-items: center; gap: 4px;
+      background: var(--sky); border-radius: 999px; padding: 2px 10px;
+      font-size: 12px; font-weight: 800; color: var(--ink);
+    }
+    .reindex-bar {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      background: var(--sky); border: 2px solid var(--ink); border-radius: 20px; padding: 12px 16px;
+      font-size: 14px; font-weight: 700; line-height: 1.5;
+    }
+    .reindex-bar[hidden] { display: none; }
+    .reindex-bar .pill { min-height: 40px; }
+    .related { display: flex; flex-direction: column; gap: 10px; border-top: 2px dashed var(--line); padding-top: 14px; }
+    .related h3 { margin: 0; font-size: 15px; font-weight: 800; }
+    .related-list { display: flex; flex-direction: column; gap: 8px; }
+    .related-item {
+      all: unset; cursor: pointer; display: flex; gap: 12px; align-items: center;
+      background: var(--cream); border-radius: 18px; padding: 10px 12px;
+      transition: transform .15s ease, background .15s ease;
+    }
+    .related-item:hover { background: var(--mint-soft); transform: translateX(4px); }
+    .related-item:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+    .related-thumb { width: 52px; height: 52px; border-radius: 14px; overflow: hidden; flex-shrink: 0; background: var(--peach); }
+    .related-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .related-text { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .related-title { font-weight: 800; font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+    .related-meta { font-size: 12px; color: var(--muted); }
+    .related-empty { margin: 0; font-size: 13px; color: var(--muted); }
     .card-snippet {
       margin: 0; overflow-wrap: anywhere; font-size: 13px; line-height: 1.6; color: var(--ink-2);
       background: var(--cream); border-radius: 12px; padding: 8px 10px;
@@ -413,6 +441,11 @@
         <div class="active-filters" id="activeFilters"></div>
       </div>
     </section>
+
+    <div id="reindexBar" class="reindex-bar" role="status" hidden>
+      <span id="reindexText"></span>
+      <button id="reindexBtn" class="pill pill-ink" type="button">開始建立</button>
+    </div>
 
     <nav id="tagNav" class="tag-nav" aria-label="標籤（可複選）"></nav>
 
@@ -730,7 +763,11 @@
       body.append(summary);
     }
 
-    const snip = rawSnippet(row);
+    if (row._match === "semantic") {
+      body.append(el("span", { class: "sem-badge", title: "沒有完全符合的字，但意思相近" }, ["意思相近"]));
+    }
+
+    const snip = row._match === "semantic" ? null : rawSnippet(row);
     if (snip) {
       const p = el("p", { class: "card-snippet" });
       setHighlighted(p, snip);
@@ -1053,7 +1090,12 @@
     rest.push(el("div", { class: "panel-actions" }, [pinBtn, editBtn, delBtn]));
 
     rest.forEach(n => n.classList.add("fade-in"));
-    panelBody.append(el("div", { class: "panel-main" }, [head, ...rest]));
+    const related = el("section", { class: "related fade-in", "aria-label": "相關筆記" }, [
+      el("h3", { text: "相關筆記" }),
+      el("p", { class: "related-empty", text: "尋找中…" }),
+    ]);
+    panelBody.append(el("div", { class: "panel-main" }, [head, ...rest, related]));
+    loadRelated(row, related);
   }
 
   function renderPanelEdit() {
@@ -1191,11 +1233,84 @@
   }
 
   /* ========= 啟動 ========= */
+  /* ========= 相關筆記 ========= */
+  async function loadRelated(row, section) {
+    let list = [];
+    try { list = (await api(`/api/related?id=${encodeURIComponent(row.id)}&limit=5`)).data || []; }
+    catch (e) { if (e.message === "unauthorized") return; }
+    if (!section.isConnected || !currentRow || String(currentRow.id) !== String(row.id)) return;
+    section.querySelector(".related-empty")?.remove();
+    if (!list.length) {
+      section.append(el("p", { class: "related-empty", text: "還沒有找到相近的筆記。" }));
+      return;
+    }
+    section.append(el("div", { class: "related-list" }, list.map((r) => {
+      const img = images(r)[0];
+      const thumb = el("span", { class: "related-thumb", "aria-hidden": "true" },
+        img ? [el("img", { src: `${img.url}?width=160`, alt: "", loading: "lazy" })] : []);
+      thumb.style.background = mediaColor(r);
+      const tags = (Array.isArray(r.tags) ? r.tags : []).slice(0, 3).join("、");
+      return el("button", { class: "related-item", type: "button", onclick: () => switchPanelTo(r) }, [
+        thumb,
+        el("span", { class: "related-text" }, [
+          el("span", { class: "related-title", text: r.title || "無標題記錄" }),
+          el("span", { class: "related-meta", text: [tags, fmtTime(r.created_at)].filter(Boolean).join(" · ") }),
+        ]),
+      ]);
+    })));
+  }
+
+  // 在已開啟的面板中切換到另一則筆記
+  function switchPanelTo(row) {
+    const prev = currentRow && findCardEl(currentRow.id);
+    if (prev) prev.style.visibility = "";
+    const inList = state.items.find(r => String(r.id) === String(row.id));
+    currentRow = inList ? { ...row, ...inList } : row;
+    const next = findCardEl(currentRow.id);
+    if (next) next.style.visibility = "hidden";
+    renderPanelView();
+    panelEl.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    if (!reduceMotion) {
+      panelBody.animate([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }],
+        { duration: 260, easing: "ease-out" });
+    }
+  }
+
+  /* ========= 補建語意索引 ========= */
+  async function checkReindex() {
+    let info;
+    try { info = await api("/api/reindex"); } catch { return; }
+    const bar = $("reindexBar");
+    if (!info.configured || !info.remaining) { bar.hidden = true; return; }
+    $("reindexText").textContent = `有 ${info.remaining} 則筆記還沒建立語意索引，建立後搜尋才能理解意思、找到相關筆記。`;
+    bar.hidden = false;
+  }
+
+  $("reindexBtn").addEventListener("click", async () => {
+    const btn = $("reindexBtn"), text = $("reindexText");
+    btn.disabled = true;
+    let doneTotal = 0;
+    try {
+      for (let guard = 0; guard < 200; guard++) {
+        const r = await api("/api/reindex", { method: "POST" });
+        doneTotal += r.done || 0;
+        text.textContent = `建立中…已完成 ${doneTotal} 則，還剩 ${r.remaining} 則`;
+        if (!r.remaining || (!r.done && r.failed)) break;
+      }
+      await checkReindex();
+      if ($("reindexBar").hidden) toast("語意索引建立完成");
+    } catch (e) {
+      text.textContent = `建立時發生錯誤：${e.message}。可以稍後再按一次繼續。`;
+    }
+    btn.disabled = false;
+  });
+
   function start() {
     readUrl();
     renderFilters();
     loadTags();
     search(false);
+    checkReindex();
   }
 
   (async () => {
