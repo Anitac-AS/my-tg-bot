@@ -2,9 +2,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 import { isEmbeddingConfigured, embedText, noteText, toPgVector } from "../lib/embedding.js";
+import { answerCallback, editReplyMarkup, isAllowedUserId } from "../lib/telegram.js";
+import { pushOne, siteUrl } from "../lib/resurface.js";
 
 // ====== Gemini 設定 ======
-const MODEL_NAME = "gemini-2.5-flash";
+const MODEL_NAME = process.env.GEMINI_TEXT_MODEL || "gemini-2.5-flash";
 
 const CORE_TAGS = ["教育","親子","AI","資訊","健康","旅遊","趣味","購物","興趣"];
 
@@ -156,6 +158,35 @@ async function handlePhotoUpload(fileId) {
   }
 }
 
+// ====== 每日推播的按鈕（再來一則／以後別推）======
+async function handleCallback(cq, req) {
+  if (!isAllowedUserId(cq.from?.id)) return answerCallback(cq.id);
+  const [kind, action, id] = String(cq.data || "").split(":");
+  if (kind !== "rs") return answerCallback(cq.id);
+  const chatId = cq.message?.chat?.id;
+
+  if (action === "more") {
+    await answerCallback(cq.id, "好，再來一則");
+    await pushOne(chatId, siteUrl(req), id);
+    return;
+  }
+
+  if (action === "off" && id) {
+    const { error } = await supabase.from("notes").update({ resurface_opt_out: true }).eq("id", id);
+    if (error) {
+      console.error("Opt-out failed:", error);
+      return answerCallback(cq.id, "設定失敗，請稍後再試");
+    }
+    await answerCallback(cq.id, "之後不會再推這則了");
+    // 拿掉「以後別推」按鈕，只留下其他按鈕
+    const kb = (cq.message?.reply_markup?.inline_keyboard || [])
+      .map(row => row.filter(b => b.callback_data !== cq.data)).filter(row => row.length);
+    try { await editReplyMarkup(chatId, cq.message.message_id, { inline_keyboard: kb }); } catch (e) { console.error(e); }
+    return;
+  }
+  return answerCallback(cq.id);
+}
+
 // ====== Webhook 主處理器 ======
 export default async function handler(req, res) {
   let chatId;
@@ -163,6 +194,11 @@ export default async function handler(req, res) {
   try {
     if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
     if (!verifyTelegramSecretToken(req)) return res.status(401).send("Unauthorized");
+
+    if (req.body?.callback_query) {
+      try { await handleCallback(req.body.callback_query, req); } catch (e) { console.error("Callback error:", e); }
+      return res.status(200).send("OK");
+    }
 
     const msg = req.body?.message || req.body?.edited_message;
     if (!msg) return res.status(200).send("OK");
