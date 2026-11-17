@@ -29,7 +29,7 @@ export default async function handler(req, res) {
       if (!isEmbeddingConfigured()) return res.status(500).json({ error: "尚未設定 GEMINI_API_KEY" });
 
       const { data: rows, error } = await supabase
-        .from("notes").select("id, title, summary, tags, raw_text")
+        .from("notes").select("id, title, summary, tags, raw_text, attachments")
         .is("embedding", null).order("created_at", { ascending: false }).limit(BATCH);
       if (error) throw error;
 
