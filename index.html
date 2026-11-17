@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <title>Shu's MyMind</title>
+  <title>書書小口袋</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#FFF6E5" />
   <link rel="icon" href="/favicon.png" type="image/png" />
@@ -71,7 +71,7 @@
     }
     .home:hover .home-mark { transform: rotate(90deg); }
     .home-text { display: flex; flex-direction: column; }
-    .home-title { font-family: var(--font-latin); font-weight: 600; font-size: 44px; line-height: 1; }
+    .home-title { font-family: var(--font); font-weight: 800; font-size: 42px; line-height: 1.1; letter-spacing: 1px; }
     .home-sub { font-size: 15px; font-weight: 500; margin-top: 4px; }
     .top-actions { display: flex; gap: 10px; align-items: center; }
 
@@ -337,7 +337,7 @@
       padding: 28px 24px; display: flex; flex-direction: column; gap: 14px; text-align: center;
     }
     .login-box .home-mark { margin: 0 auto; }
-    .login-box h1 { margin: 0; font-family: var(--font-latin); font-weight: 600; font-size: 30px; }
+    .login-box h1 { margin: 0; font-family: var(--font); font-weight: 800; font-size: 30px; letter-spacing: 1px; }
     .login-box input {
       padding: 14px 18px; border-radius: 999px; border: 2px solid var(--line);
       background: var(--cream); font-size: 16px; outline: none; text-align: center;
@@ -397,7 +397,7 @@
       <span class="home-mark" aria-hidden="true">
         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1E3A2F" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>
       </span>
-      <h1>Shu's MyMind</h1>
+      <h1>書書小口袋</h1>
       <label class="sr-only" for="loginPassword">密碼</label>
       <input id="loginPassword" type="password" placeholder="請輸入密碼" autocomplete="current-password" required />
       <button type="submit" id="loginBtn" class="pill pill-ink">登入</button>
@@ -407,13 +407,12 @@
 
   <div class="wrap">
     <header class="top">
-      <a href="/" id="homeLink" class="home" aria-label="Shu's MyMind，回到首頁">
+      <a href="/" id="homeLink" class="home" aria-label="書書小口袋，回到首頁">
         <span class="home-mark" aria-hidden="true">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#1E3A2F" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>
         </span>
         <span class="home-text">
-          <span class="home-title">Shu's MyMind</span>
-          <span class="home-sub">填充、歸納、壯大、使用</span>
+          <span class="home-title">書書小口袋</span>
         </span>
       </a>
       <div class="top-actions">
