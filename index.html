@@ -187,6 +187,81 @@
       margin: 0; overflow-wrap: anywhere; font-size: 14px; line-height: 1.7; color: var(--ink-2);
       display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
     }
+    /* 連結預覽 */
+    .media-domain {
+      position: absolute; left: 10px; bottom: 10px; display: inline-flex; gap: 6px; align-items: center;
+      background: var(--white); border: 2px solid var(--ink); border-radius: 999px; padding: 3px 10px;
+      font-family: var(--font-latin); font-size: 12px; max-width: calc(100% - 20px);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-media { position: relative; }
+    .card-link { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); line-height: 1.5; min-width: 0; }
+    .card-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .link-box {
+      display: flex; gap: 14px; align-items: stretch; text-decoration: none; color: var(--ink);
+      background: var(--cream); border-radius: 18px; padding: 12px; min-width: 0;
+      transition: background .15s ease;
+    }
+    .link-box:hover { background: var(--mint-soft); color: var(--ink); }
+    .link-thumb { width: 96px; min-height: 72px; flex-shrink: 0; border-radius: 12px; overflow: hidden; background: var(--sky); }
+    .link-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .link-text { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .link-title { font-weight: 800; font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }
+    .link-desc { font-size: 13px; color: var(--ink-2); line-height: 1.6; overflow-wrap: anywhere;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .link-site { font-family: var(--font-latin); font-size: 12px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+
+    /* 檢視切換 */
+    .view-group { display: flex; gap: 6px; margin-left: auto; }
+    .view-btn {
+      display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 8px 14px;
+      border-radius: 12px; border: 2px solid var(--line); background: var(--white); color: var(--ink);
+      font-weight: 700; font-size: 14px; cursor: pointer;
+    }
+    .view-btn.active { background: var(--butter); border-color: var(--ink); }
+
+    /* 時間軸 */
+    .cards.timeline { display: flex; flex-direction: column; align-items: stretch; gap: 36px; }
+    .tl-month { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 28px; align-items: start; }
+    .tl-head { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; position: sticky; top: 16px; }
+    .tl-month-name { font-weight: 800; font-size: 38px; line-height: 1; }
+    .tl-year { font-family: var(--font-latin); font-size: 15px; color: var(--muted); }
+    .tl-count {
+      align-self: flex-start; margin-top: 6px; font-size: 13px; font-weight: 800; border: 2px solid var(--ink);
+      border-radius: 10px; padding: 2px 10px; transform: rotate(-3deg);
+    }
+    .tl-list { display: flex; flex-direction: column; gap: 12px; padding-left: 26px; border-left: 3px dashed var(--line); }
+    .tl-item {
+      position: relative; display: flex; gap: 14px; align-items: center; min-width: 0;
+      background: var(--white); border: 2px solid var(--ink); border-radius: 22px; padding: 12px 14px;
+      transition: transform .2s var(--bounce); animation: cardIn .4s var(--bounce) backwards;
+    }
+    .tl-item:hover { transform: translateX(4px); }
+    .tl-item:focus-within { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .tl-dot { position: absolute; left: -40px; top: 50%; margin-top: -10px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--ink); }
+    .tl-day { width: 46px; flex-shrink: 0; text-align: center; display: flex; flex-direction: column; }
+    .tl-day b { font-family: var(--font-latin); font-weight: 600; font-size: 22px; line-height: 1; }
+    .tl-day span { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .tl-thumb { width: 56px; height: 56px; flex-shrink: 0; border-radius: 14px; overflow: hidden; }
+    .tl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .tl-text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .tl-open { all: unset; cursor: pointer; font-weight: 800; font-size: 16px; line-height: 1.35; overflow-wrap: anywhere; }
+    .tl-open::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: 22px; }
+    .tl-open:focus-visible { outline: none; }
+    .tl-summary { margin: 0; font-size: 13px; color: var(--ink-2); line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tl-tag { flex-shrink: 0; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 4px 10px; }
+    .tl-pin { font-size: 11px; font-weight: 800; background: var(--coral); border-radius: 8px; padding: 1px 6px; margin-right: 6px; vertical-align: 2px; }
+    @media (max-width: 768px) {
+      .tl-month { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+      .tl-head { position: static; flex-direction: row; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+      .tl-month-name { font-size: 28px; }
+      .tl-count { margin-top: 0; }
+      .tl-list { padding-left: 18px; }
+      .tl-dot { left: -30px; width: 14px; height: 14px; margin-top: -8px; }
+      .tl-tag { display: none; }
+      .view-group { margin-left: 0; }
+    }
+
     /* 重溫卡 */
     .resurface { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 20px; padding-top: 8px; }
     .resurface[hidden] { display: none; }
@@ -497,6 +572,16 @@
           <button class="type-btn" type="button" data-type="text">純文字</button>
         </div>
         <div class="active-filters" id="activeFilters"></div>
+        <div class="view-group" id="viewGroup" role="group" aria-label="檢視方式">
+          <button class="view-btn" type="button" data-view="cards">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E3A2F" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+            卡片
+          </button>
+          <button class="view-btn" type="button" data-view="timeline">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1E3A2F" stroke-width="2.2" stroke-linecap="round"><path d="M6 4v16M6 7h12M6 12h9M6 17h11"/></svg>
+            時間軸
+          </button>
+        </div>
       </div>
     </section>
 
@@ -567,7 +652,7 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ========= 狀態 ========= */
-  const state = { q: "", tags: [], type: "", items: [], total: 0, loading: false, reqId: 0 };
+  const state = { q: "", tags: [], type: "", view: "cards", items: [], total: 0, loading: false, reqId: 0 };
   let tagCounts = [];
   let tagsExpanded = false;
   let currentRow = null;
@@ -618,6 +703,14 @@
   }
 
   function tagColor(t) { return TAG_COLOR[t] || CUSTOM_TAG_COLOR; }
+  function linkOf(row) { return (Array.isArray(row.attachments) ? row.attachments : []).find(a => a?.type === "link" && a.url) || null; }
+  function hostOf(url) { try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return ""; } }
+  // 外部網站的縮圖：不送 referrer，載入失敗就整塊拿掉
+  function extImg(src, onFail) {
+    const img = el("img", { src, alt: "", loading: "lazy", referrerpolicy: "no-referrer" });
+    img.addEventListener("error", () => onFail?.(img));
+    return img;
+  }
   function images(row) { return (Array.isArray(row.attachments) ? row.attachments : []).filter(a => a?.type === "image" && a.url); }
   function hasLink(row) { return /https?:\/\//i.test(row.raw_text || ""); }
   function mediaColor(row) { return MEDIA_COLORS[Math.abs(Number(row.id) || 0) % MEDIA_COLORS.length]; }
@@ -701,6 +794,7 @@
     state.q = p.get("q") || "";
     state.tags = (p.get("tags") || "").split(",").map(s => s.trim()).filter(Boolean);
     state.type = p.get("type") || "";
+    state.view = p.get("view") === "timeline" ? "timeline" : "cards";
   }
 
   function writeUrl(push) {
@@ -708,6 +802,7 @@
     if (state.q) p.set("q", state.q);
     if (state.tags.length) p.set("tags", state.tags.join(","));
     if (state.type) p.set("type", state.type);
+    if (state.view === "timeline") p.set("view", "timeline");
     const qs = p.toString();
     if ((qs ? `?${qs}` : "") === location.search) return;
     history[push ? "pushState" : "replaceState"](null, "", qs ? `?${qs}` : location.pathname);
@@ -726,6 +821,7 @@
   /* ========= 篩選 ========= */
   function renderFilters() {
     searchInput.value = state.q;
+    renderViewToggle();
     typeGroupEl.querySelectorAll(".type-btn").forEach(b => {
       const on = b.dataset.type === state.type;
       b.classList.toggle("active", on);
@@ -814,10 +910,17 @@
     if (citeNo) card.append(el("span", { class: "cite-badge", text: citeNo, "aria-label": `AI 整理第 ${citeNo} 則` }));
 
     const img = images(row)[0];
+    const link = linkOf(row);
     if (img) {
       const media = el("div", { class: "card-media", "aria-hidden": "true" }, [
         el("img", { src: `${img.url}?width=640`, loading: "lazy", alt: "" }),
       ]);
+      media.style.background = mediaColor(row);
+      card.append(media);
+    } else if (link?.image) {
+      const media = el("div", { class: "card-media", "aria-hidden": "true" });
+      media.append(extImg(link.image, () => media.remove()),
+        el("span", { class: "media-domain" }, [svgIcon(ICON_LINK, 12), link.site || hostOf(link.url)]));
       media.style.background = mediaColor(row);
       card.append(media);
     }
@@ -827,6 +930,11 @@
     setHighlighted(openBtn, row.title || "無標題記錄");
     openBtn.addEventListener("click", () => openPanel(row, card));
     body.append(openBtn);
+    if (link && (!link.image || img) && (link.title || link.site)) {
+      body.append(el("div", { class: "card-link", title: link.title || "" }, [svgIcon(ICON_LINK, 12), el("span", { text: link.title || link.site || hostOf(link.url) })]));
+    } else if (link?.image && link.title && link.title !== row.title) {
+      body.append(el("div", { class: "card-link", title: link.title }, [el("span", { text: `網頁：${link.title}` })]));
+    }
 
     if (row.summary) {
       const summary = el("p", { class: "card-summary" });
@@ -869,6 +977,7 @@
 
   function renderCards(fromIndex = 0) {
     queueMicrotask(updateAiBar);
+    cardsEl.classList.toggle("timeline", state.view === "timeline");
     if (fromIndex === 0) cardsEl.innerHTML = "";
     cardsEl.querySelector(".load-more-wrap")?.remove();
     cardsEl.querySelector(".empty")?.remove();
@@ -878,7 +987,8 @@
       cardsEl.append(el("p", { class: "empty",
         text: filtered ? "沒有符合的記錄，試試減少篩選條件。" : "這裡還空空的，從 Telegram 丟點東西進來吧。" }));
     } else {
-      state.items.slice(fromIndex).forEach((row, i) => cardsEl.append(buildCard(row, fromIndex + i)));
+      if (state.view === "timeline") renderTimeline(fromIndex);
+      else state.items.slice(fromIndex).forEach((row, i) => cardsEl.append(buildCard(row, fromIndex + i)));
       if (state.items.length < state.total) {
         cardsEl.append(el("div", { class: "load-more-wrap" }, [
           el("button", { class: "pill pill-white", type: "button",
@@ -891,7 +1001,7 @@
   }
 
   function findCardEl(id) {
-    return cardsEl.querySelector(`.card[data-id="${CSS.escape(String(id))}"]`);
+    return cardsEl.querySelector(`[data-id="${CSS.escape(String(id))}"]`);
   }
 
   /* ========= 資料載入 ========= */
@@ -1108,6 +1218,21 @@
 
     const rest = [];
     if (row.summary) rest.push(el("p", { class: "panel-summary", text: row.summary }));
+    const plink = linkOf(row);
+    if (plink) {
+      const box = el("a", { class: "link-box", href: plink.url, target: "_blank", rel: "noopener noreferrer" });
+      if (plink.image) {
+        const th = el("span", { class: "link-thumb", "aria-hidden": "true" });
+        th.append(extImg(plink.image, () => th.remove()));
+        box.append(th);
+      }
+      box.append(el("span", { class: "link-text" }, [
+        el("span", { class: "link-title", text: plink.title || plink.url }),
+        plink.description ? el("span", { class: "link-desc", text: plink.description }) : null,
+        el("span", { class: "link-site" }, [svgIcon(ICON_LINK, 12), plink.site || hostOf(plink.url)]),
+      ]));
+      rest.push(box);
+    }
     const tags = Array.isArray(row.tags) ? row.tags : [];
     if (tags.length) {
       rest.push(el("div", { class: "panel-tags" }, tags.map((t, i) => {
@@ -1355,11 +1480,18 @@
 
   /* ========= 補建語意索引 ========= */
   async function checkReindex() {
-    let info;
-    try { info = await api("/api/reindex"); } catch { return; }
+    const [idx, lk] = await Promise.all([
+      api("/api/reindex").catch(() => null),
+      api("/api/linkpreview").catch(() => null),
+    ]);
+    const emb = idx?.configured ? (idx.remaining || 0) : 0;
+    const links = lk?.remaining || 0;
     const bar = $("reindexBar");
-    if (!info.configured || !info.remaining) { bar.hidden = true; return; }
-    $("reindexText").textContent = `有 ${info.remaining} 則筆記還沒建立語意索引，建立後搜尋才能理解意思、找到相關筆記。`;
+    if (!emb && !links) { bar.hidden = true; return; }
+    const parts = [];
+    if (links) parts.push(`${links} 則連結還沒抓網頁預覽`);
+    if (emb) parts.push(`${emb} 則筆記還沒建立語意索引`);
+    $("reindexText").textContent = `有 ${parts.join("、")}。處理完，卡片會顯示網頁縮圖，搜尋也更懂意思。`;
     bar.hidden = false;
   }
 
@@ -1368,6 +1500,15 @@
     btn.disabled = true;
     let doneTotal = 0;
     try {
+      // 先補連結預覽（會讓那幾則需要重建索引），再建立語意索引
+      let linkDone = 0;
+      for (let guard = 0; guard < 200; guard++) {
+        let r;
+        try { r = await api("/api/linkpreview", { method: "POST" }); } catch { break; }
+        linkDone += (r.done || 0) + (r.failed || 0);
+        text.textContent = `抓網頁預覽中…已處理 ${linkDone} 則，還剩 ${r.remaining} 則`;
+        if (!r.remaining || (!r.done && !r.failed)) break;
+      }
       for (let guard = 0; guard < 200; guard++) {
         const r = await api("/api/reindex", { method: "POST" });
         doneTotal += r.done || 0;
@@ -1375,11 +1516,109 @@
         if (!r.remaining || (!r.done && r.failed)) break;
       }
       await checkReindex();
-      if ($("reindexBar").hidden) toast("語意索引建立完成");
+      if ($("reindexBar").hidden) { toast("處理完成"); search(false); }
     } catch (e) {
       text.textContent = `建立時發生錯誤：${e.message}。可以稍後再按一次繼續。`;
     }
     btn.disabled = false;
+  });
+
+  /* ========= 時間軸 ========= */
+  const MONTH_BG = ["#FFE27A", "#BDEBD3", "#BFE0FF", "#FFC8A6", "#FFD6E0"];
+  const WEEK = ["週日", "週一", "週二", "週三", "週四", "週五", "週六"];
+
+  function localParts(iso) {
+    const d = new Date(iso || Date.now());
+    const f = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short" });
+    const parts = Object.fromEntries(f.formatToParts(d).map(p => [p.type, p.value]));
+    const wd = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(parts.weekday);
+    return { y: parts.year, m: parts.month, d: parts.day, wd: WEEK[wd] || "" };
+  }
+
+  function monthGroup(key, y, m) {
+    let g = cardsEl.querySelector(`.tl-month[data-key="${key}"]`);
+    if (g) return g;
+    const count = el("span", { class: "tl-count" });
+    count.style.background = MONTH_BG[(Number(y) * 12 + Number(m)) % MONTH_BG.length];
+    g = el("section", { class: "tl-month", "data-key": key, "aria-label": `${y} 年 ${Number(m)} 月` }, [
+      el("div", { class: "tl-head" }, [
+        el("span", { class: "tl-month-name", text: `${Number(m)} 月` }),
+        el("span", { class: "tl-year", text: y }),
+        count,
+      ]),
+      el("div", { class: "tl-list" }),
+    ]);
+    // 依月份新到舊插入（置頂筆記可能來自較舊的月份）
+    const after = [...cardsEl.querySelectorAll(".tl-month")].find(x => x.dataset.key < key);
+    cardsEl.insertBefore(g, after || cardsEl.querySelector(".load-more-wrap") || null);
+    return g;
+  }
+
+  function buildTimelineItem(row, index) {
+    const { y, m, d, wd } = localParts(row.created_at);
+    const item = el("article", { class: "tl-item", "data-id": row.id });
+    item.style.animationDelay = `${(index % PAGE_SIZE) * 0.02}s`;
+    if (currentRow && String(currentRow.id) === String(row.id)) item.style.visibility = "hidden";
+    const tags = Array.isArray(row.tags) ? row.tags : [];
+    const dot = el("span", { class: "tl-dot", "aria-hidden": "true" });
+    dot.style.background = tags[0] ? tagColor(tags[0]) : "#FFFFFF";
+    item.append(dot, el("span", { class: "tl-day" }, [el("b", { text: d }), el("span", { text: wd })]));
+
+    const img = images(row)[0], link = linkOf(row);
+    const thumbSrc = img ? `${img.url}?width=160` : (link?.image || "");
+    if (thumbSrc) {
+      const th = el("span", { class: "tl-thumb", "aria-hidden": "true" });
+      th.style.background = mediaColor(row);
+      th.append(img ? el("img", { src: thumbSrc, alt: "", loading: "lazy" }) : extImg(thumbSrc, () => th.remove()));
+      item.append(th);
+    }
+
+    const open = el("button", { class: "tl-open", type: "button" });
+    if (row.pinned) open.append(el("span", { class: "tl-pin", text: "置頂" }));
+    const t = el("span"); setHighlighted(t, row.title || "無標題記錄"); open.append(t);
+    open.addEventListener("click", () => openPanel(row, item));
+    const text = el("span", { class: "tl-text" }, [open]);
+    if (row.summary) { const sm = el("p", { class: "tl-summary" }); setHighlighted(sm, row.summary); text.append(sm); }
+    item.append(text);
+
+    if (tags[0]) {
+      const tg = el("span", { class: "tl-tag", text: tags[0] });
+      tg.style.background = tagColor(tags[0]);
+      item.append(tg);
+    }
+    const citeNo = ai.numbers.get(String(row.id));
+    if (citeNo) item.append(el("span", { class: "cite-badge", text: citeNo }));
+    return { item, key: `${y}-${m}`, y, m };
+  }
+
+  function renderTimeline(fromIndex) {
+    state.items.slice(fromIndex).forEach((row, i) => {
+      const { item, key, y, m } = buildTimelineItem(row, fromIndex + i);
+      monthGroup(key, y, m).querySelector(".tl-list").append(item);
+    });
+    const groups = [...cardsEl.querySelectorAll(".tl-month")];
+    const more = state.items.length < state.total;
+    groups.forEach((g, i) => {
+      const n = g.querySelectorAll(".tl-item").length;
+      g.querySelector(".tl-count").textContent = `${n}${more && i === groups.length - 1 ? "+" : ""} 則`;
+    });
+  }
+
+  function renderViewToggle() {
+    $("viewGroup").querySelectorAll(".view-btn").forEach(b => {
+      const on = b.dataset.view === state.view;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", on);
+    });
+  }
+
+  $("viewGroup").addEventListener("click", (e) => {
+    const btn = e.target.closest(".view-btn");
+    if (!btn || btn.dataset.view === state.view) return;
+    state.view = btn.dataset.view;
+    writeUrl(true);
+    renderViewToggle();
+    renderCards(0);
   });
 
   /* ========= AI 整理 ========= */

@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { isEmbeddingConfigured, embedText, noteText, toPgVector } from "../lib/embedding.js";
 import { answerCallback, editReplyMarkup, isAllowedUserId } from "../lib/telegram.js";
 import { pushOne, siteUrl } from "../lib/resurface.js";
+import { firstUrl, fetchLinkPreview, previewContext } from "../lib/linkpreview.js";
 
 // ====== Gemini 設定 ======
 const MODEL_NAME = process.env.GEMINI_TEXT_MODEL || "gemini-2.5-flash";
@@ -242,6 +243,11 @@ export default async function handler(req, res) {
       }
     }
 
+    // ====== 連結預覽（抓不到不影響存檔）======
+    const linkPreview = await fetchLinkPreview(firstUrl(messageText));
+    if (linkPreview) attachments.push(linkPreview);
+    const aiInput = messageText + previewContext(linkPreview);
+
     // ====== AI 分析 ======
     console.log("Analyze:", messageText);
     const model = genAI.getGenerativeModel({
@@ -251,7 +257,7 @@ export default async function handler(req, res) {
     });
 
     const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: messageText }] }],
+      contents: [{ role: "user", parts: [{ text: aiInput }] }],
     });
 
     let parsed;
@@ -276,14 +282,15 @@ export default async function handler(req, res) {
           raw_text: messageText,
           attachments: attachments,
           created_at: new Date().toISOString(),
-          embedding: await makeEmbedding({ ...parsed, raw_text: messageText }),
+          embedding: await makeEmbedding({ ...parsed, raw_text: messageText, attachments }),
         });
 
       if (dbError) console.error("DB Insert Error:", dbError);
     }
 
     // ====== 回覆 Telegram ======
-    const hasImg = attachments.length > 0 ? " [包含圖片]" : "";
+    const hasImg = attachments.some(a => a.type === "image") ? " [包含圖片]"
+      : attachments.some(a => a.type === "link") ? " [含連結預覽]" : "";
 
     const pretty = [
       `🧠 <b>AI 歸檔完成${hasImg}</b>`,
