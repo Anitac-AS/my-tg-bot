@@ -187,6 +187,65 @@
       margin: 0; overflow-wrap: anywhere; font-size: 14px; line-height: 1.7; color: var(--ink-2);
       display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
     }
+    /* 重溫卡 */
+    .resurface { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 20px; padding-top: 8px; }
+    .resurface[hidden] { display: none; }
+    .rs-card {
+      position: relative; min-width: 0; border: 2px solid var(--ink); border-radius: 28px;
+      padding: 20px 22px; display: flex; flex-direction: column; gap: 10px;
+      transition: transform .25s var(--bounce);
+    }
+    .rs-card:hover { transform: translateY(-4px) rotate(-.4deg); }
+    .rs-card:focus-within { outline: 3px solid var(--ink); outline-offset: 4px; }
+    .rs-label {
+      position: absolute; top: -12px; left: 20px; z-index: 2; background: var(--white); border: 2px solid var(--ink);
+      border-radius: 10px; padding: 2px 12px; font-size: 13px; font-weight: 800; transform: rotate(var(--rot, -3deg));
+    }
+    .rs-meta { font-family: var(--font-latin); font-size: 13px; color: #2F4B40; margin-top: 6px; }
+    .rs-title { all: unset; cursor: pointer; font-weight: 800; font-size: 20px; line-height: 1.35; overflow-wrap: anywhere; }
+    .rs-title::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: 28px; }
+    .rs-title:focus-visible { outline: none; }
+    .rs-summary { margin: 0; font-size: 14px; line-height: 1.7; color: #2F4B40; overflow-wrap: anywhere;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .rs-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .rs-foot .pill { position: relative; z-index: 2; min-height: 40px; background: var(--white); }
+    .rs-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .rs-tags span { font-size: 12px; font-weight: 700; background: var(--white); border-radius: 999px; padding: 4px 10px; transform: rotate(var(--rot, 0deg)); }
+
+    /* AI 整理 */
+    .ai-bar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+    .ai-bar[hidden] { display: none; }
+    .ai-btn { font-size: 15px; font-weight: 800; min-height: 46px; padding: 10px 20px; }
+    .ai-card {
+      position: relative; background: var(--white); border: 2px solid var(--ink); border-radius: 32px;
+      padding: 26px 28px; display: flex; flex-direction: column; gap: 12px; margin-top: 8px;
+      animation: cardIn .4s var(--bounce);
+    }
+    .ai-card[hidden] { display: none; }
+    .ai-label {
+      position: absolute; top: -14px; left: 24px; background: var(--butter); border: 2px solid var(--ink);
+      border-radius: 10px; padding: 3px 12px; font-size: 13px; font-weight: 800; transform: rotate(-3deg);
+    }
+    .ai-intro { margin: 6px 0 0; font-size: 16px; line-height: 1.85; font-weight: 700; overflow-wrap: anywhere; }
+    .ai-points { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; line-height: 1.8; overflow-wrap: anywhere; }
+    .ai-excluded { margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.7; }
+    .ai-foot { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; border-top: 2px dashed var(--line); padding-top: 12px; font-size: 13px; color: var(--muted); }
+    .ai-foot .pill { min-height: 36px; padding: 6px 14px; font-size: 13px; background: var(--white); }
+    .ai-foot .push { margin-left: auto; }
+    .ai-loading { display: flex; gap: 10px; align-items: center; font-weight: 700; margin-top: 6px; }
+    .ai-loading .spinner { border-color: rgba(30, 58, 47, .2); border-top-color: var(--ink); }
+    .cite {
+      display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px;
+      margin: 0 2px; padding: 0 4px; border-radius: 999px; background: var(--sky); border: 1.5px solid var(--ink);
+      font-family: var(--font-latin); font-size: 12px; font-weight: 600; color: var(--ink); cursor: pointer; vertical-align: 2px;
+    }
+    .cite:hover { background: var(--ink); color: var(--cream); }
+    .cite-badge {
+      position: absolute; top: -10px; left: -10px; z-index: 3; width: 32px; height: 32px; border-radius: 999px;
+      background: var(--sky); border: 2px solid var(--ink); display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-latin); font-weight: 600; font-size: 13px;
+    }
+
     .sem-badge {
       align-self: flex-start; display: inline-flex; align-items: center; gap: 4px;
       background: var(--sky); border-radius: 999px; padding: 2px 10px;
@@ -441,12 +500,22 @@
       </div>
     </section>
 
+    <section id="resurface" class="resurface" aria-label="重溫" hidden></section>
+
     <div id="reindexBar" class="reindex-bar" role="status" hidden>
       <span id="reindexText"></span>
       <button id="reindexBtn" class="pill pill-ink" type="button">開始建立</button>
     </div>
 
     <nav id="tagNav" class="tag-nav" aria-label="標籤（可複選）"></nav>
+
+    <div id="aiBar" class="ai-bar" hidden>
+      <button id="aiBtn" class="pill pill-coral ai-btn" type="button">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E3A2F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+        請 AI 整理這些結果
+      </button>
+    </div>
+    <section id="aiCard" class="ai-card" aria-label="AI 整理" aria-live="polite" hidden></section>
 
     <main>
       <div id="cards" class="cards"></div>
@@ -503,6 +572,7 @@
   let tagsExpanded = false;
   let currentRow = null;
   let panelAnimating = false;
+  let panelSource = null; // 打開面板的來源元素（卡片或重溫卡）
 
   /* ========= 小工具 ========= */
   function el(tag, props = {}, children = []) {
@@ -740,6 +810,8 @@
     if (currentRow && String(currentRow.id) === String(row.id)) card.style.visibility = "hidden";
 
     if (row.pinned) card.append(el("span", { class: "pin-sticker", text: "置頂" }));
+    const citeNo = ai.numbers.get(String(row.id));
+    if (citeNo) card.append(el("span", { class: "cite-badge", text: citeNo, "aria-label": `AI 整理第 ${citeNo} 則` }));
 
     const img = images(row)[0];
     if (img) {
@@ -796,6 +868,7 @@
   }
 
   function renderCards(fromIndex = 0) {
+    queueMicrotask(updateAiBar);
     if (fromIndex === 0) cardsEl.innerHTML = "";
     cardsEl.querySelector(".load-more-wrap")?.remove();
     cardsEl.querySelector(".empty")?.remove();
@@ -824,7 +897,9 @@
   /* ========= 資料載入 ========= */
   function search(push) {
     state.items = []; state.total = 0;
+    resetAi();
     writeUrl(push);
+    updateResurface();
     renderFilters();
     renderTagNav();
     window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
@@ -911,6 +986,7 @@
     const canMorph = !reduceMotion && from && from.bottom > 0 && from.top < innerHeight;
 
     if (cardEl) cardEl.style.visibility = "hidden";
+    panelSource = cardEl || null;
     $("panelClose").focus({ preventScroll: true });
 
     if (!canMorph) {
@@ -944,7 +1020,7 @@
   function closePanel(instant = false) {
     if (overlayEl.hidden || (panelAnimating && !instant)) return;
     const id = currentRow?.id;
-    const cardEl = id != null ? findCardEl(id) : null;
+    const cardEl = (panelSource && panelSource.isConnected) ? panelSource : (id != null ? findCardEl(id) : null);
 
     const finish = () => {
       overlayEl.hidden = true;
@@ -955,6 +1031,7 @@
       document.body.style.overflow = "";
       currentRow = null;
       panelAnimating = false;
+      if (panelSource) { panelSource.style.visibility = ""; panelSource = null; }
       if (cardEl) {
         cardEl.style.visibility = "";
         if (!instant) cardEl.querySelector(".card-open")?.focus({ preventScroll: true });
@@ -1263,6 +1340,7 @@
   function switchPanelTo(row) {
     const prev = currentRow && findCardEl(currentRow.id);
     if (prev) prev.style.visibility = "";
+    if (panelSource) { panelSource.style.visibility = ""; panelSource = null; }
     const inList = state.items.find(r => String(r.id) === String(row.id));
     currentRow = inList ? { ...row, ...inList } : row;
     const next = findCardEl(currentRow.id);
@@ -1304,12 +1382,186 @@
     btn.disabled = false;
   });
 
+  /* ========= AI 整理 ========= */
+  const AI_MAX = 10;
+  const ai = { numbers: new Map(), ids: [], busy: false, reqId: 0 };
+
+  function isFiltered() { return Boolean(state.q || state.tags.length); }
+
+  function updateAiBar() {
+    $("aiBar").hidden = !(isFiltered() && state.items.length > 0) || !$("aiCard").hidden;
+  }
+
+  function resetAi() {
+    ai.reqId++;
+    ai.numbers.clear(); ai.ids = []; ai.busy = false;
+    cardsEl.querySelectorAll(".cite-badge").forEach(n => n.remove());
+    $("aiCard").hidden = true; $("aiCard").innerHTML = "";
+    $("aiBtn").disabled = false;
+    updateAiBar();
+  }
+
+  function openById(id) {
+    const row = state.items.find(r => String(r.id) === String(id));
+    if (row) openPanel(row, findCardEl(id));
+  }
+
+  $("aiBtn").addEventListener("click", async () => {
+    if (ai.busy) return;
+    const rows = state.items.slice(0, AI_MAX);
+    if (!rows.length) return;
+    ai.busy = true;
+    const my = ++ai.reqId;
+    $("aiBar").hidden = true;
+    const card = $("aiCard");
+    card.hidden = false;
+    card.innerHTML = "";
+    card.append(
+      el("span", { class: "ai-label", text: `AI 整理｜根據前 ${rows.length} 筆結果` }),
+      el("div", { class: "ai-loading" }, [el("span", { class: "spinner" }), "正在讀你的筆記…"]),
+    );
+    try {
+      const r = await api("/api/summarize", { method: "POST", body: JSON.stringify({ q: state.q, ids: rows.map(x => x.id) }) });
+      if (my !== ai.reqId) return;
+      ai.ids = r.ids.map(String);
+      ai.numbers = new Map(ai.ids.map((id, i) => [id, i + 1]));
+      renderAiCard(r);
+      ai.ids.forEach((id, i) => {
+        const c = findCardEl(id);
+        if (c && !c.querySelector(".cite-badge")) c.append(el("span", { class: "cite-badge", text: i + 1 }));
+      });
+    } catch (e) {
+      if (my !== ai.reqId || e.message === "unauthorized") return;
+      card.innerHTML = "";
+      card.append(
+        el("span", { class: "ai-label", text: "AI 整理" }),
+        el("p", { class: "ai-intro", text: e.message || "整理失敗，請稍後再試" }),
+        el("div", { class: "ai-foot" }, [el("button", { class: "pill push", type: "button", text: "收起", onclick: resetAi })]),
+      );
+    } finally {
+      if (my === ai.reqId) ai.busy = false;
+    }
+  });
+
+  function citeButtons(refs) {
+    return refs.map(n => {
+      const id = ai.ids[n - 1];
+      return el("button", { class: "cite", type: "button", text: n, "aria-label": `打開第 ${n} 則筆記`, onclick: () => openById(id) });
+    });
+  }
+
+  function renderAiCard(r) {
+    const card = $("aiCard");
+    card.innerHTML = "";
+    const parts = [el("span", { class: "ai-label", text: `AI 整理｜根據前 ${r.ids.length} 筆結果` })];
+    if (r.intro) parts.push(el("p", { class: "ai-intro", text: r.intro }));
+    if (r.points?.length) {
+      parts.push(el("ul", { class: "ai-points" }, r.points.map(p => el("li", {}, [p.text, ...citeButtons(p.refs || [])]))));
+    }
+    if (r.excluded) parts.push(el("p", { class: "ai-excluded", text: r.excluded }));
+    const plain = [r.intro, ...(r.points || []).map(p => `・${p.text}`), r.excluded].filter(Boolean).join("\n");
+    const copyBtn = el("button", { class: "pill", type: "button", text: "複製" });
+    copyBtn.addEventListener("click", () => navigator.clipboard.writeText(plain).then(() => toast("已複製")).catch(() => toast("複製失敗")));
+    parts.push(el("div", { class: "ai-foot" }, [
+      el("span", { text: "只根據這些筆記整理，筆記裡沒有的不會自己補。" }),
+      el("span", { class: "push" }, [copyBtn]),
+      el("button", { class: "pill", type: "button", text: "收起", onclick: resetAi }),
+    ]));
+    card.append(...parts);
+  }
+
+  /* ========= 重溫 ========= */
+  const rs = { loaded: false, onThisDay: [], random: null };
+
+  function updateResurface() {
+    const sec = $("resurface");
+    const home = !state.q && !state.tags.length && !state.type;
+    sec.hidden = !home || (!rs.onThisDay.length && !rs.random);
+    if (home && !rs.loaded) loadResurface();
+  }
+
+  async function loadResurface() {
+    rs.loaded = true;
+    try {
+      const r = await api("/api/resurface");
+      rs.onThisDay = r.onThisDay || [];
+      rs.random = r.random || null;
+    } catch { return; }
+    renderResurface();
+    updateResurface();
+  }
+
+  function rsCard({ row, label, meta, bg, rot, extra }) {
+    const card = el("article", { class: "rs-card" });
+    card.style.background = bg;
+    const title = el("button", { class: "rs-title", type: "button", text: row.title || "無標題記錄" });
+    title.addEventListener("click", () => openPanel(row, card));
+    const tags = (Array.isArray(row.tags) ? row.tags : []).slice(0, 3);
+    const lab = el("span", { class: "rs-label", text: label });
+    lab.style.setProperty("--rot", rot);
+    card.append(
+      lab,
+      el("span", { class: "rs-meta", text: meta }),
+      title,
+      row.summary ? el("p", { class: "rs-summary", text: row.summary }) : null,
+      el("div", { class: "rs-foot" }, [
+        el("div", { class: "rs-tags" }, tags.map((t, i) => { const s = el("span", { text: t }); s.style.setProperty("--rot", ROTS[i % ROTS.length]); return s; })),
+        extra || null,
+      ]),
+    );
+    return card;
+  }
+
+  function fmtDay(iso) {
+    return iso ? new Date(iso).toLocaleDateString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit" }) : "";
+  }
+
+  function renderResurface() {
+    const sec = $("resurface");
+    sec.innerHTML = "";
+    const day = rs.onThisDay[0];
+    if (day) {
+      const more = rs.onThisDay.length - 1;
+      sec.append(rsCard({
+        row: day, bg: "#BFE0FF", rot: "-3deg",
+        label: `${day.years_ago || 1} 年前的今天`,
+        meta: fmtDay(day.created_at) + (more > 0 ? ` · 那天還存了 ${more} 則` : ""),
+      }));
+    }
+    if (rs.random) {
+      const again = el("button", { class: "pill", type: "button", text: "換一則" });
+      again.addEventListener("click", async () => {
+        again.disabled = true;
+        try {
+          const r = await api(`/api/resurface?random=1&exclude=${encodeURIComponent(rs.random.id)}`);
+          if (r.random) { rs.random = r.random; renderResurface(); }
+        } catch (e) { toast(e.message, 2500); }
+        again.disabled = false;
+      });
+      sec.append(rsCard({
+        row: rs.random, bg: "#BDEBD3", rot: "2deg",
+        label: "隨機一則", meta: `${fmtDay(rs.random.created_at)} 存的`, extra: again,
+      }));
+    }
+  }
+
+  /* ========= 從 Telegram 點進來：?note=123 ========= */
+  async function openDeepLink(id) {
+    if (!id) return;
+    try {
+      const { data } = await api(`/api/notes?id=${encodeURIComponent(id)}`);
+      if (data) openPanel(data, null);
+    } catch (e) { if (e.message !== "unauthorized") toast("找不到這則筆記", 2500); }
+  }
+
   function start() {
+    const deepNote = new URLSearchParams(location.search).get("note");
     readUrl();
     renderFilters();
     loadTags();
     search(false);
     checkReindex();
+    if (deepNote) openDeepLink(deepNote);
   }
 
   (async () => {

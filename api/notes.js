@@ -27,6 +27,15 @@ function cleanTags(input) {
 
 async function handleGet(req, res) {
   const p = getParams(req);
+
+  // 單一筆記（深連結 ?note= 會用到）
+  if (p.get("id")) {
+    const { data, error } = await supabase.from("notes").select("*").eq("id", p.get("id")).single();
+    if (error || !data) return res.status(404).json({ error: "找不到這筆記錄" });
+    delete data.embedding;
+    return res.status(200).json({ data });
+  }
+
   const q = (p.get("q") || "").trim().slice(0, 200);
   const tagsParam = p.get("tags") || p.get("tag") || "";
   const tags = tagsParam.split(",").map(s => s.trim()).filter(Boolean).slice(0, 10);
