@@ -8,8 +8,20 @@ import { allowedUserIds } from "../lib/telegram.js";
 import { pushOne, siteUrl } from "../lib/resurface.js";
 
 function isCron(req) {
-  const secret = process.env.CRON_SECRET;
-  return Boolean(secret) && req.headers.authorization === `Bearer ${secret}`;
+  const secret = (process.env.CRON_SECRET || "").trim();
+  const auth = String(req.headers.authorization || "").trim();
+  const ok = Boolean(secret) && auth === `Bearer ${secret}`;
+  if (!ok && /vercel-cron/i.test(req.headers["user-agent"] || "")) {
+    // 只記錄診斷資訊，不記錄密碼內容
+    console.warn("Daily cron unauthorized:", {
+      envSecretSet: Boolean(secret),
+      envSecretLength: secret.length,
+      authHeaderPresent: Boolean(auth),
+      authHeaderLength: auth.length,
+      authStartsWithBearer: auth.startsWith("Bearer "),
+    });
+  }
+  return ok;
 }
 
 export default async function handler(req, res) {
